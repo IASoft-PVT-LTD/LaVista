@@ -1,0 +1,3 @@
+[submodule "libauxid"]
+	path = libauxid
+	url = https://github.com/I-A-S/Auxid

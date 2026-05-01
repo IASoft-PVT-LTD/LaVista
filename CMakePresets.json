@@ -1,0 +1,170 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28
+  },
+  "configurePresets": [
+    {
+      "name": "LaVista-x64-linux",
+      "displayName": "LaVista Linux x64 (Clang)",
+      "inherits": "x64-linux",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-linux-clang.cmake"
+      }
+    },
+    {
+      "name": "LaVista-arm64-linux",
+      "displayName": "LaVista Linux ARM64 (Clang Cross)",
+      "inherits": "arm64-linux",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/arm64-linux-clang.cmake"
+      }
+    },
+    {
+      "name": "LaVista-x64-windows-msvc",
+      "displayName": "LaVista Windows x64 (Ninja MSVC)",
+      "inherits": "x64-windows-msvc",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-windows-msvc.cmake"
+      }
+    },
+    {
+      "name": "LaVista-x64-windows-clang",
+      "displayName": "LaVista Windows x64 (Ninja Clang)",
+      "inherits": "x64-windows-clang",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-windows-clang.cmake"
+      }
+    },
+    {
+      "name": "LaVista-arm64-windows-clang",
+      "displayName": "LaVista Windows ARM64 (Ninja Clang Cross)",
+      "inherits": "arm64-windows-clang",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/arm64-windows-clang.cmake"
+      }
+    },
+    {
+      "name": "LaVista-arm64-windows-msvc",
+      "displayName": "LaVista Windows ARM64 (Ninja MSVC)",
+      "inherits": "arm64-windows-msvc",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/arm64-windows-msvc.cmake"
+      }
+    },
+    {
+      "name": "LaVista-x64-windows",
+      "displayName": "LaVista Windows x64 (Visual Studio 2022)",
+      "inherits": "x64-windows",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-windows-msvc.cmake"
+      }
+    },
+    {
+      "name": "LaVista-arm64-windows",
+      "displayName": "LaVista Windows ARM64 (Visual Studio 2022)",
+      "inherits": "arm64-windows",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/arm64-windows-msvc.cmake"
+      }
+    },
+    {
+      "name": "LaVista-wasm32-emscripten",
+      "displayName": "LaVista WebAssembly (Clang)",
+      "inherits": "wasm32-emscripten",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/wasm32-emscripten-clang.cmake"
+      }
+    },
+    {
+      "name": "LaVista-x64-windows-cross",
+      "displayName": "LaVista Windows x64 (Clang Cross Linux Host)",
+      "inherits": "x64-windows-cross",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-windows-cross-clang.cmake"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "LaVista-x64-linux",
+      "configurePreset": "LaVista-x64-linux"
+    },
+    {
+      "name": "LaVista-arm64-linux",
+      "configurePreset": "LaVista-arm64-linux"
+    },
+    {
+      "name": "LaVista-x64-windows-msvc",
+      "configurePreset": "LaVista-x64-windows-msvc"
+    },
+    {
+      "name": "LaVista-x64-windows-clang",
+      "configurePreset": "LaVista-x64-windows-clang"
+    },
+    {
+      "name": "LaVista-arm64-windows-clang",
+      "configurePreset": "LaVista-arm64-windows-clang"
+    },
+    {
+      "name": "LaVista-arm64-windows-msvc",
+      "configurePreset": "LaVista-arm64-windows-msvc"
+    },
+    {
+      "name": "LaVista-x64-windows",
+      "configurePreset": "LaVista-x64-windows"
+    },
+    {
+      "name": "LaVista-arm64-windows",
+      "configurePreset": "LaVista-arm64-windows"
+    },
+    {
+      "name": "LaVista-wasm32-emscripten",
+      "configurePreset": "LaVista-wasm32-emscripten"
+    },
+    {
+      "name": "LaVista-x64-windows-cross",
+      "configurePreset": "LaVista-x64-windows-cross"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "LaVista-x64-linux",
+      "configurePreset": "LaVista-x64-linux",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "LaVista-x64-windows",
+      "configurePreset": "LaVista-x64-windows",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "LaVista-x64-windows-clang",
+      "configurePreset": "LaVista-x64-windows-clang",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "include": [
+    "libauxid/CMakePresets.json"
+  ]
+}
