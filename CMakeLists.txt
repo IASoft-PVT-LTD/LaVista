@@ -29,6 +29,10 @@ include(cmake/find_deps.cmake)
 
 add_subdirectory(src)
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sandbox")
+    add_subdirectory(sandbox)
+endif()
+
 if(LaVista_BUILD_TESTS)
     add_subdirectory(tests)
 endif()

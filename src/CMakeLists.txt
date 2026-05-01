@@ -6,5 +6,10 @@ target_include_directories(LaVista PUBLIC
 )
 target_include_directories(LaVista PRIVATE hpp)
 
-target_link_libraries(LaVista PUBLIC libauxid)
-target_link_libraries(LaVista PRIVATE auxid_platform_standard)
+target_link_libraries(LaVista PUBLIC 
+    libauxid
+    webview::core_static
+)
+target_link_libraries(LaVista PRIVATE 
+    auxid_platform_standard
+)

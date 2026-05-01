@@ -1,6 +1,7 @@
 .clangd/
 .cache/
 .local/
+sandbox/
 build/
 out/
 

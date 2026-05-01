@@ -2,6 +2,7 @@
 
 #include <auxid/auxid.hpp>
 
-namespace LaVista {
-    // TODO: Add library declarations
+namespace LaVista
+{
+
 }
