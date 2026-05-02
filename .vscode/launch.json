@@ -11,7 +11,7 @@
       "program": "${workspaceFolder}/out/build/LaVista-x64-windows-clang/bin/Debug/Sandbox.exe",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/sandbox",
       "environment": [],
       "console": "internalConsole",
       "preLaunchTask": "CMake Build"

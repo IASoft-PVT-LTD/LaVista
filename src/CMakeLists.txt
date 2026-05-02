@@ -8,8 +8,14 @@ target_include_directories(LaVista PRIVATE hpp)
 
 target_link_libraries(LaVista PUBLIC 
     libauxid
-    webview::core_static
 )
+
 target_link_libraries(LaVista PRIVATE 
+    webview::core_static
     auxid_platform_standard
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  find_package(X11 REQUIRED)
+  target_link_libraries(LaVista PRIVATE X11::X11)
+endif()
