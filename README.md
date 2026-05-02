@@ -30,7 +30,7 @@ Other platforms fall back to a minimal stub implementation for development; prim
 - **Git** with submodules - LibAuxid is expected as a submodule at `libauxid/`.
 - **C++20** toolchain - MSVC or Clang, consistent with [LibAuxid](libauxid/README.md) and your chosen preset.
 
-### Linux (Ubuntu-style)
+### Linux (Debian Based)
 
 Typical packages (see [CI](.github/workflows/ci.yaml)):
 
