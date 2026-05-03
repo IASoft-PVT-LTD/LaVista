@@ -387,9 +387,9 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
     {
       theme_class = "lavista-tb-theme-minimal";
     }
-    replace_all(html, "<theme_class_placeholder>", StringView(theme_class));
-    replace_all(html, "<window_icon_placeholder>", StringView(img_tag));
-    replace_all(html, "<window_title_placeholder>", StringView(html_escape_title_text(window_title)));
+    replace_all(html, "<theme_class_placeholder>", StringView(theme_class.c_str()));
+    replace_all(html, "<window_icon_placeholder>", StringView(img_tag.c_str()));
+    replace_all(html, "<window_title_placeholder>", StringView(html_escape_title_text(window_title).c_str()));
 
     return html;
   }
