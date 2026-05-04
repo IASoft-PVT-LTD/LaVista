@@ -16,6 +16,7 @@
 #pragma once
 
 #include <auxid/auxid.hpp>
+#include <auxid/containers/option.hpp>
 #include <auxid/containers/vec.hpp>
 #include <auxid/containers/pair.hpp>
 
@@ -55,6 +56,18 @@ namespace LaVista
     f32 end_x_percentage{100.0f};
     f32 end_y_percentage{5.0f};
   };
+
+  /**
+   * Native file dialogs (via Native File Dialog). On success, returns a path; if the user cancels, returns an empty
+   * `Option`. On failure, returns an error (see `NFD_GetError` message in the result string where applicable).
+   */
+  auto open_file_dialog(const Span<const char *const> &filters, const String &default_path = "")
+      -> Result<Option<String>>;
+  auto open_files_dialog(const Span<const char *const> &filters, const String &default_path = "")
+      -> Result<Option<Vec<String>>>;
+  auto open_folder_dialog(const String &default_path = "") -> Result<Option<String>>;
+  auto save_file_dialog(const Span<const char *const> &filters, const String &default_path = "")
+      -> Result<Option<String>>;
 
   auto get_displays() -> Result<Vec<DisplayInfo>>;
 

@@ -9,6 +9,14 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 
 FetchContent_Declare(
+  NFD
+  GIT_REPOSITORY https://github.com/I-A-S/nativefiledialog-cmake
+  GIT_TAG main
+  SYSTEM
+)
+FetchContent_MakeAvailable(NFD)
+
+FetchContent_Declare(
   webview
   GIT_REPOSITORY https://github.com/webview/webview
   GIT_TAG 0.12.0

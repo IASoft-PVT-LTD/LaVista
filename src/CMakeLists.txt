@@ -1,6 +1,7 @@
 add_library(LaVista STATIC
     cpp/internal.cpp
     cpp/window_management.cpp
+    cpp/file_dialogs.cpp
 )
 
 target_include_directories(LaVista PUBLIC
@@ -37,6 +38,7 @@ target_link_libraries(LaVista PUBLIC
 )
 
 target_link_libraries(LaVista PRIVATE
+    NativeFileDialog
     webview::core_static
     auxid_platform_standard
 )
