@@ -64,8 +64,14 @@ namespace LaVista
    */
   auto json_escape_for_string_literal(StringView raw) -> String;
 
-  /** Builds a JSON array of JSON strings: `["a","b"]`, using `json_escape_for_string_literal` for each element. */
-  auto json_encode_string_array(const Vec<String> &items) -> String;
+  /**
+   * Serializes `items` as a JSON array.
+   * - `Vec<String>`: JSON strings, `["a","b"]`, via `json_escape_for_string_literal` per element.
+   * - `Vec<i32>` / `Vec<f32>`: JSON numbers; non-finite floats encode as `null`.
+   */
+  auto json_encode_array(const Vec<String> &items) -> String;
+  auto json_encode_array(const Vec<i32> &items) -> String;
+  auto json_encode_array(const Vec<f32> &items) -> String;
 
   /**
    * Creates the native window, loads the SPA bundle, and applies LaVista's default host title bar: same chrome as the

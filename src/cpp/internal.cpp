@@ -17,6 +17,8 @@
 
 #include <chrono>
 #include <cctype>
+#include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <system_error>
@@ -189,7 +191,7 @@ namespace LaVista
     return out;
   }
 
-  auto json_encode_string_array(const Vec<String> &items) -> String
+  auto json_encode_array(const Vec<String> &items) -> String
   {
     String s;
     s.push_back('[');
@@ -200,6 +202,50 @@ namespace LaVista
         s.push_back(',');
       }
       s += json_escape_for_string_literal(StringView(items[i].c_str(), items[i].size()));
+    }
+    s.push_back(']');
+    return s;
+  }
+
+  auto json_encode_array(const Vec<i32> &items) -> String
+  {
+    String s;
+    s.push_back('[');
+    for (usize i = 0; i < items.size(); ++i)
+    {
+      if (i != 0)
+      {
+        s.push_back(',');
+      }
+      char buf[32];
+      std::snprintf(buf, sizeof(buf), "%d", items[i]);
+      s += buf;
+    }
+    s.push_back(']');
+    return s;
+  }
+
+  auto json_encode_array(const Vec<f32> &items) -> String
+  {
+    String s;
+    s.push_back('[');
+    for (usize i = 0; i < items.size(); ++i)
+    {
+      if (i != 0)
+      {
+        s.push_back(',');
+      }
+      const f32 v = items[i];
+      if (!std::isfinite(static_cast<double>(v)))
+      {
+        s += "null";
+      }
+      else
+      {
+        char buf[64];
+        std::snprintf(buf, sizeof(buf), "%.9g", static_cast<double>(v));
+        s += buf;
+      }
     }
     s.push_back(']');
     return s;
