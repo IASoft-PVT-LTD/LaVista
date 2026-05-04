@@ -141,6 +141,69 @@ namespace LaVista
   {
     return _internal::platform_get_displays();
   }
+
+  auto json_escape_for_string_literal(StringView raw) -> String
+  {
+    String out;
+    out.reserve(raw.size() + 2);
+    out.push_back('"');
+    for (const unsigned char c : raw)
+    {
+      switch (c)
+      {
+      case '"':
+        out += "\\\"";
+        break;
+      case '\\':
+        out += "\\\\";
+        break;
+      case '\b':
+        out += "\\b";
+        break;
+      case '\f':
+        out += "\\f";
+        break;
+      case '\n':
+        out += "\\n";
+        break;
+      case '\r':
+        out += "\\r";
+        break;
+      case '\t':
+        out += "\\t";
+        break;
+      default:
+        if (c < 0x20U)
+        {
+          char buf[8];
+          std::snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned>(c));
+          out += buf;
+        }
+        else
+        {
+          out.push_back(static_cast<char>(c));
+        }
+      }
+    }
+    out.push_back('"');
+    return out;
+  }
+
+  auto json_encode_string_array(const Vec<String> &items) -> String
+  {
+    String s;
+    s.push_back('[');
+    for (usize i = 0; i < items.size(); ++i)
+    {
+      if (i != 0)
+      {
+        s.push_back(',');
+      }
+      s += json_escape_for_string_literal(StringView(items[i].c_str(), items[i].size()));
+    }
+    s.push_back(']');
+    return s;
+  }
 } // namespace LaVista
 
 namespace LaVista::_internal

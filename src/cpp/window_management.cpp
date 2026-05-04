@@ -113,6 +113,31 @@ namespace LaVista
       webview_return(ctx->window->webview, id, 0, "null");
   }
 
+  static auto json_binding_thunk(const char *id, const char *req, void *arg) -> void
+  {
+    auto *ctx = static_cast<JsonBindingContext_T *>(arg);
+    if (ctx == nullptr || ctx->window == nullptr)
+    {
+      return;
+    }
+
+    auto *handler = ctx->window->json_binding_handlers.find(ctx->name);
+    if (handler == nullptr)
+    {
+      if (ctx->window->webview != nullptr && id != nullptr)
+      {
+        webview_return(ctx->window->webview, id, 0, "null");
+      }
+      return;
+    }
+
+    const String out = (*handler)(String(req == nullptr ? "" : req));
+    if (ctx->window->webview != nullptr && id != nullptr)
+    {
+      webview_return(ctx->window->webview, id, 0, out.c_str());
+    }
+  }
+
   static auto drag_strip_region_valid(const WindowDragStripOptions &o) -> bool
   {
     return o.end_x_percentage > o.start_x_percentage && o.end_y_percentage > o.start_y_percentage;
@@ -664,6 +689,13 @@ namespace LaVista
     window->binding_contexts.clear();
     window->callbacks.clear();
 
+    for (const auto &binding : window->json_binding_contexts)
+    {
+      webview_unbind(window->webview, binding.first.c_str());
+    }
+    window->json_binding_contexts.clear();
+    window->json_binding_handlers.clear();
+
     if (window->chrome_bind_ctx != nullptr && window->chrome_bind_ctx->sender != nullptr)
     {
       unbind_chrome(window->chrome_bind_ctx->sender);
@@ -820,6 +852,11 @@ namespace LaVista
     }
 
     const String event_key(event.c_str());
+    if (window->json_binding_handlers.find(event_key) != nullptr)
+    {
+      return fail("Name is already bound as a window function; unbind it first");
+    }
+
     window->callbacks[event_key] = callback;
 
     auto binding_ctx = memory::make_box<BindingContext_T>();
@@ -856,6 +893,76 @@ namespace LaVista
     }
     window->callbacks.erase(event);
     window->binding_contexts.erase(event);
+    return {};
+  }
+
+  auto bind_window_function(Window window, const String &name, const Function<String, const String &> &handler)
+      -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+    if (name.empty())
+    {
+      return fail("Function name cannot be empty");
+    }
+
+    const String name_key(name.c_str());
+    if (window->callbacks.find(name_key) != nullptr)
+    {
+      return fail("Name is already bound as a window event; unbind it first");
+    }
+
+    window->json_binding_handlers[name_key] = handler;
+
+    if (window->json_binding_contexts.find(name_key) != nullptr)
+    {
+      return {};
+    }
+
+    auto binding_ctx = memory::make_box<JsonBindingContext_T>();
+    binding_ctx->window = window;
+    binding_ctx->name = name_key;
+
+    auto bind_result =
+        _internal::webview_error_to_result(webview_bind(window->webview, name.c_str(), json_binding_thunk, binding_ctx.get()),
+                                           "webview_bind(window function)");
+    if (bind_result.is_err())
+    {
+      window->json_binding_handlers.erase(name_key);
+      return fail(std::move(bind_result.unwrap_err()));
+    }
+
+    window->json_binding_contexts.insert(name_key, std::move(binding_ctx));
+    return {};
+  }
+
+  auto unbind_window_function(Window window, const String &name) -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+    if (name.empty())
+    {
+      return fail("Function name cannot be empty");
+    }
+
+    const String name_key(name.c_str());
+    if (window->json_binding_contexts.find(name_key) == nullptr)
+    {
+      return fail("Function is not bound");
+    }
+
+    auto unbind_result =
+        _internal::webview_error_to_result(webview_unbind(window->webview, name.c_str()), "webview_unbind");
+    if (unbind_result.is_err())
+    {
+      return fail(std::move(unbind_result.unwrap_err()));
+    }
+    window->json_binding_handlers.erase(name_key);
+    window->json_binding_contexts.erase(name_key);
     return {};
   }
 

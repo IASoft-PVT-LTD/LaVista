@@ -49,6 +49,12 @@ namespace LaVista
     String event;
   };
 
+  struct JsonBindingContext_T
+  {
+    Window window = nullptr;
+    String name;
+  };
+
   struct Window_T
   {
     webview_t webview = nullptr;
@@ -68,6 +74,8 @@ namespace LaVista
     bool running = true;
     HashMap<String, Function<void, const String &>> callbacks;
     HashMap<String, memory::Box<BindingContext_T>> binding_contexts;
+    HashMap<String, Function<String, const String &>> json_binding_handlers;
+    HashMap<String, memory::Box<JsonBindingContext_T>> json_binding_contexts;
     memory::Box<_internal::DragBindCtx> content_drag_bind_ctx{nullptr};
     memory::Box<_internal::DragBindCtx> titlebar_drag_bind_ctx{nullptr};
     memory::Box<_internal::ChromeBindCtx> chrome_bind_ctx{nullptr};

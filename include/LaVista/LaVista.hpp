@@ -38,8 +38,6 @@ namespace LaVista
   {
     String title{"LaVista App"};
     String spa_bundle_path{""};
-    /** Required. Path to a window icon image (PNG, JPEG, or any format supported by stb_image). Decoded once at
-     *  creation via stb_image; cannot be changed afterward. */
     String icon_path{""};
 
     i32 width{800};
@@ -59,6 +57,15 @@ namespace LaVista
   };
 
   auto get_displays() -> Result<Vec<DisplayInfo>>;
+
+  /**
+   * Escapes `raw` as a JSON string literal (including surrounding double quotes), suitable for concatenating into JSON
+   * payloads or JavaScript source text.
+   */
+  auto json_escape_for_string_literal(StringView raw) -> String;
+
+  /** Builds a JSON array of JSON strings: `["a","b"]`, using `json_escape_for_string_literal` for each element. */
+  auto json_encode_string_array(const Vec<String> &items) -> String;
 
   /**
    * Creates the native window, loads the SPA bundle, and applies LaVista's default host title bar: same chrome as the
@@ -81,8 +88,8 @@ namespace LaVista
 
   /**
    * Host-managed title bar rendered above the SPA in a separate webview (replacing the default title bar applied by
-   * `create_window`). Pass HTML for a full document, or a body fragment (wrapped automatically). Pass an empty string to
-   * remove the title bar; window chrome bindings move back to the content webview.
+   * `create_window`). Pass HTML for a full document, or a body fragment (wrapped automatically). Pass an empty string
+   * to remove the title bar; window chrome bindings move back to the content webview.
    *
    * Drag-to-move for the title-bar band is enabled only when `html` is non-empty and `height_px` > 0 (strip height is
    * `height_px` within the band). If `height_px` is 0 with non-empty `html`, the band still reserves space but dragging
@@ -93,4 +100,14 @@ namespace LaVista
   auto bind_window_event(Window window, const String &event, const Function<void, const String &> &callback)
       -> Result<void>;
   auto unbind_window_event(Window window, const String &event) -> Result<void>;
+
+  /**
+   * Binds a host function on the SPA content webview only (`window.<name>(...)`). The handler receives the JSON-encoded
+   * request argument from JavaScript (often a serialized object or empty string) and must return a UTF-8 string that is
+   * a complete JSON value (`null`, booleans, numbers, strings, arrays, objects) passed to the Promise on the JS side.
+   * Underlying webview/GTK APIs are not exposed. Do not use the same `name` as `bind_window_event`.
+   */
+  auto bind_window_function(Window window, const String &name, const Function<String, const String &> &handler)
+      -> Result<void>;
+  auto unbind_window_function(Window window, const String &name) -> Result<void>;
 } // namespace LaVista
