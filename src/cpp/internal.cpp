@@ -278,11 +278,13 @@ namespace LaVista::_internal
 </style>
 <header class="lavista-tb-root <theme_class_placeholder>">
 <div class="lavista-tb-left">
+<button type="button" class="lavista-tb-btn" style="background: transparent; padding: 0; margin: 0; border: none;" aria-label="Menu" onclick="if(window.LaVista_Menu)window.LaVista_Menu()">
 <svg xmlns="http://www.w3.org/2000/svg" width="22px" height="22px" viewBox="0 0 24 24" fill="none">
 <path d="M20 7L4 7" stroke="#ddd" stroke-width="1.5" stroke-linecap="round"/>
 <path d="M20 12L4 12" stroke="#ddd" stroke-width="1.5" stroke-linecap="round"/>
 <path d="M20 17L4 17" stroke="#ddd" stroke-width="1.5" stroke-linecap="round"/>
 </svg>
+</button>
 <window_icon_placeholder>
 </div>
 <span class="lavista-tb-title"><window_title_placeholder></span>

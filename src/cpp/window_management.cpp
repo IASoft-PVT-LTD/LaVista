@@ -91,6 +91,7 @@ namespace LaVista
         return;
       }
       (void) webview_unbind(w, "LaVista_Minimize");
+      (void) webview_unbind(w, "LaVista_Menu");
       (void) webview_unbind(w, "LaVista_Maximize");
       (void) webview_unbind(w, "LaVista_QueryMaximized");
       (void) webview_unbind(w, "LaVista_Close");
@@ -343,6 +344,28 @@ namespace LaVista
     if (minimize_bind.is_err())
     {
       return fail(std::move(minimize_bind.unwrap_err()));
+    }
+
+    auto menu_bind = _internal::webview_error_to_result(
+        webview_bind(
+            sender, "LaVista_Menu",
+            +[](const char *id, const char *req, void *arg) {
+              (void) req;
+              auto *c = static_cast<_internal::ChromeBindCtx *>(arg);
+              if (c != nullptr && c->window != nullptr && c->window->menu_button_callback_bound)
+              {
+                c->window->menu_button_callback();
+              }
+              if (c != nullptr && c->sender != nullptr && id != nullptr)
+              {
+                webview_return(c->sender, id, 0, "null");
+              }
+            },
+            ctx),
+        "webview_bind(LaVista_Menu)");
+    if (menu_bind.is_err())
+    {
+      return fail(std::move(menu_bind.unwrap_err()));
     }
 
     auto maximize_bind =
@@ -963,6 +986,29 @@ namespace LaVista
     }
     window->json_binding_handlers.erase(name_key);
     window->json_binding_contexts.erase(name_key);
+    return {};
+  }
+
+  auto bind_window_menu_button(Window window, const Function<void> &callback) -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+
+    window->menu_button_callback = callback;
+    window->menu_button_callback_bound = true;
+    return {};
+  }
+
+  auto unbind_window_menu_button(Window window) -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+
+    window->menu_button_callback_bound = false;
     return {};
   }
 

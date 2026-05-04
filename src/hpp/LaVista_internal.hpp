@@ -73,6 +73,8 @@ namespace LaVista
     String titlebar_html{};
     bool running = true;
     HashMap<String, Function<void, const String &>> callbacks;
+    Function<void> menu_button_callback;
+    bool menu_button_callback_bound = false;
     HashMap<String, memory::Box<BindingContext_T>> binding_contexts;
     HashMap<String, Function<String, const String &>> json_binding_handlers;
     HashMap<String, memory::Box<JsonBindingContext_T>> json_binding_contexts;

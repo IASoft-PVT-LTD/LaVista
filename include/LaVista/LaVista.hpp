@@ -116,4 +116,11 @@ namespace LaVista
   auto bind_window_function(Window window, const String &name, const Function<String, const String &> &handler)
       -> Result<void>;
   auto unbind_window_function(Window window, const String &name) -> Result<void>;
+
+  /**
+   * Binds the default titlebar menu button callback.
+   * The callback runs when the menu button in LaVista's built-in titlebar is clicked.
+   */
+  auto bind_window_menu_button(Window window, const Function<void> &callback) -> Result<void>;
+  auto unbind_window_menu_button(Window window) -> Result<void>;
 } // namespace LaVista
