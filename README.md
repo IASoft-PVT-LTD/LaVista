@@ -81,7 +81,7 @@ cmake --preset LaVista-x64-windows
 cmake --build --preset LaVista-x64-windows --config Release
 ```
 
-Additional presets for ARM64, Ninja + MSVC/Clang, Emscripten, and cross-compilation can be found in [`CMakePresets.json`](CMakePresets.json).
+Additional presets for ARM64, Ninja + MSVC/Clang can be found in [`CMakePresets.json`](CMakePresets.json).
 
 ### Hello LaVista example
 

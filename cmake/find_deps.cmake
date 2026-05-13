@@ -37,14 +37,6 @@ FetchContent_MakeAvailable(webview)
 
 if(LaVista_BUILD_EXAMPLES)
   FetchContent_Declare(
-    SDL
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL
-    GIT_TAG main
-    SYSTEM
-  )
-  FetchContent_MakeAvailable(SDL)
-
-  FetchContent_Declare(
     IAVis
     GIT_REPOSITORY https://github.com/IASoft-PVT-LTD/IAVis
     GIT_TAG main

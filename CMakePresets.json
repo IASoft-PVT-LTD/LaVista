@@ -76,24 +76,6 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/arm64-windows-msvc.cmake"
       }
-    },
-    {
-      "name": "LaVista-wasm32-emscripten",
-      "displayName": "LaVista WebAssembly (Clang)",
-      "inherits": "wasm32-emscripten",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/wasm32-emscripten-clang.cmake"
-      }
-    },
-    {
-      "name": "LaVista-x64-windows-cross",
-      "displayName": "LaVista Windows x64 (Clang Cross Linux Host)",
-      "inherits": "x64-windows-cross",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/libauxid/cmake/toolchains/x64-windows-cross-clang.cmake"
-      }
     }
   ],
   "buildPresets": [
@@ -128,14 +110,6 @@
     {
       "name": "LaVista-arm64-windows",
       "configurePreset": "LaVista-arm64-windows"
-    },
-    {
-      "name": "LaVista-wasm32-emscripten",
-      "configurePreset": "LaVista-wasm32-emscripten"
-    },
-    {
-      "name": "LaVista-x64-windows-cross",
-      "configurePreset": "LaVista-x64-windows-cross"
     }
   ],
   "testPresets": [
