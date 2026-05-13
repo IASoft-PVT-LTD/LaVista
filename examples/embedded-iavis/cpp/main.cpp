@@ -29,7 +29,7 @@ auto run_app() -> Result<void>
   win_opts.spa_bundle_path = "examples/embedded-iavis/ui/dist";
   win_opts.icon_path = "examples/embedded-iavis/ui/public/logo-mark.png";
   win_opts.width = 1000;
-  win_opts.height = 800;
+  win_opts.height = 900;
 
   AU_TRY_VAR(window, LaVista::create_window(win_opts));
 

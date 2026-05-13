@@ -17,8 +17,12 @@ LaVista is a C++20 library designed to host single-page application (SPA) bundle
 Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid) (an Orthodox C++ core), leverages [webview](https://github.com/webview/webview) for the embedded browser, and uses [stb_image](https://github.com/nothings/stb) for window icon decoding. Other platforms currently use a minimal stub for development, but primary support and CI are focused on Windows and Linux x64.
 
 <p align="center">
-  <img src="example-bg-black.png" alt="LaVista sample window with host title bar and SPA content"/>
+  <img src="example.png" alt="LaVista sample window with host title bar and SPA content"/>
 </p>
+<p align="center">
+  <img src="example-embedded-iavis.png" alt="LaVista sample window with host title bar and SPA content with IAVis embedded, off-screen rendering to a canvas"/>
+</p>
+
 
 ## Features
 
