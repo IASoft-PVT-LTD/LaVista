@@ -78,10 +78,13 @@ namespace LaVista
     HashMap<String, memory::Box<BindingContext_T>> binding_contexts;
     HashMap<String, Function<String, const String &>> json_binding_handlers;
     HashMap<String, memory::Box<JsonBindingContext_T>> json_binding_contexts;
+    HashMap<String, Vec<u8>> pending_binary_buffers;
+    u64 next_binary_buffer_id = 0;
     memory::Box<_internal::DragBindCtx> content_drag_bind_ctx{nullptr};
     memory::Box<_internal::DragBindCtx> titlebar_drag_bind_ctx{nullptr};
     memory::Box<_internal::ChromeBindCtx> chrome_bind_ctx{nullptr};
     PlatformWindowContext platform{};
+    Vec<filesystem::Path> temp_files;
   };
 
   namespace _internal
@@ -124,10 +127,10 @@ namespace LaVista
     auto platform_destroy_titlebar_webview(Window window) -> Result<void>;
     auto platform_layout_webviews(Window window) -> void;
 
-    auto load_spa_bundle_into_webview(webview_t w, const filesystem::Path &index_html,
+    auto load_spa_bundle_into_webview(Window window, webview_t w, const filesystem::Path &index_html,
                                       const filesystem::Path &bundle_dir_abs) -> Result<void>;
 
-    auto load_inline_html_into_webview(webview_t w, String html_document) -> Result<void>;
+    auto load_inline_html_into_webview(Window window, webview_t w, String html_document) -> Result<void>;
 
     auto build_default_titlebar_html(const String &window_title, const String &icon_path) -> Result<String>;
   } // namespace _internal
@@ -138,7 +141,7 @@ namespace LaVista
 
     auto resize_rgba_nearest(const u8 *src, i32 sw, i32 sh, i32 dw, i32 dh, Vec<u8> &out) -> void;
 
-    auto load_spa_bundle_file_scheme(webview_t w, const filesystem::Path &index_html,
+    auto load_spa_bundle_file_scheme(Window window, webview_t w, const filesystem::Path &index_html,
                                      const filesystem::Path &bundle_dir_abs) -> Result<void>;
   } // namespace utils
 } // namespace LaVista

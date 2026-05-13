@@ -29,7 +29,7 @@ Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid) (
 - **Comprehensive Window API** - Create and destroy windows; manage titles, dimensions, and positions; or set up an optional drag strip (`set_window_drag_strip`) over a percentage of the client area.
 - **Seamless Event Binding** - Connect your web layer to C++ using `bind_window_event` and `unbind_window_event` for string-keyed callbacks.
 - **Display Management** - Query connected monitors via `get_displays` and target specific screens using `WindowCreateOptions.display_index`.
-- **Easy SPA Integration** - Serve static assets (e.g., Astro or Vite `dist/` folders) simply by pointing `spa_bundle_path` to your build directory.
+- **Easy SPA Integration** - Serve static assets (e.g., Astro or Vite `dist/` folders) simply by pointing `spa_bundle_path` to your build directory. The client application must use the `liblavista` JavaScript package to handle the host handshake and receive binary data.
 - **CMake** - Exposes a static `LaVista` target with public headers under `include/LaVista/`. Tests and examples (`LaVista_BUILD_EXAMPLES`, `LaVista_BUILD_TESTS`) default to **ON** only when LaVista is the top-level project.
 
 ## Requirements
@@ -96,7 +96,30 @@ npm run build
 cd ..
 ```
 
+*Note: The frontend template depends on the local `JavaScript/liblavista` package.*
+
 With examples enabled, execute the `HelloLaVista` binary from the repository root. This ensures that relative paths like `spa-template/dist` and `spa-template/public/logo-mark.png` resolve correctly. You can typically find the executable in `out/build/<preset>/bin/`, or within a `Release`/`Debug` subfolder depending on your generator.
+
+### Frontend Integration (liblavista)
+
+Your SPA must include the `liblavista` JavaScript package to successfully handshake with the C++ host and receive binary data.
+
+```bash
+# In your frontend project
+npm install path/to/LaVista/JavaScript/liblavista
+```
+
+Then, import it in your application:
+
+```javascript
+import { onBinaryData } from "liblavista";
+
+// The library automatically handles the host handshake on load.
+// You can listen for binary data (like framebuffer updates) from the C++ host:
+onBinaryData((buffer) => {
+    // Process ArrayBuffer
+});
+```
 
 ### Using LaVista in your project
 
@@ -121,7 +144,7 @@ opts.width = 1024;
 opts.height = 768;
 
 // Result<Window> - unwrap or AU_TRY_VAR (LibAuxid)
-AU_TRY_VAR(window, LaVista::create_window(win_opts));
+AU_TRY_VAR(window, LaVista::create_window(opts));
 
 // Loop on update_window;
 while (LaVista::update_window(window))
@@ -134,4 +157,4 @@ AU_TRY_DISCARD(LaVista::destroy_window(window));
 
 ## License
 
-Copyright (C) 2026 I-A-S. Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright (C) 2026 IASoft PVT LTD. Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).

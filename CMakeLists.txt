@@ -23,16 +23,11 @@ endif()
 
 auxid_setup_project()
 
-option(LaVista_BUILD_TESTS "Build unit tests" ${LaVista_IS_TOP_LEVEL})
 option(LaVista_BUILD_EXAMPLES "Build examples" ${LaVista_IS_TOP_LEVEL})
 
 include(cmake/find_deps.cmake)
 
 add_subdirectory(src)
-
-if(LaVista_BUILD_TESTS)
-    add_subdirectory(tests)
-endif()
 
 if(LaVista_BUILD_EXAMPLES)
     add_subdirectory(examples)

@@ -17,9 +17,9 @@
 
 namespace LaVista::_internal
 {
-  auto load_spa_bundle_into_webview(webview_t w, const filesystem::Path &index_html,
+  auto load_spa_bundle_into_webview(Window window, webview_t w, const filesystem::Path &index_html,
                                     const filesystem::Path &bundle_dir_abs) -> Result<void>
   {
-    return utils::load_spa_bundle_file_scheme(w, index_html, bundle_dir_abs);
+    return utils::load_spa_bundle_file_scheme(window, w, index_html, bundle_dir_abs);
   }
 } // namespace LaVista::_internal

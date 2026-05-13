@@ -55,6 +55,11 @@ namespace LaVista
     f32 start_y_percentage{0.0f};
     f32 end_x_percentage{100.0f};
     f32 end_y_percentage{5.0f};
+
+    i32 start_x_px{-1};
+    i32 start_y_px{-1};
+    i32 end_x_px{-1};
+    i32 end_y_px{-1};
   };
 
   /**
@@ -149,4 +154,10 @@ namespace LaVista
    * The payload is JSON-escaped automatically and becomes `event.detail` on the JavaScript side.
    */
   auto dispatch_window_event_text(Window window, const String &event_name, const String &detail_text) -> Result<void>;
+  /**
+   * Posts binary data to the SPA script environment.
+   * On Windows, this uses WebView2's shared buffer.
+   * On Linux, this uses a custom URI scheme under the hood.
+   */
+  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>;
 } // namespace LaVista

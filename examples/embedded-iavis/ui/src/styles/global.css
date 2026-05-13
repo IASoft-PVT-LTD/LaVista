@@ -1,0 +1,384 @@
+@import "tailwindcss";
+
+:root {
+	--lavista-bg: #020617;
+	--lavista-fg: #e2e8f0;
+	--lavista-fg-muted: #94a3b8;
+	--lavista-accent-a: #f97316;
+	--lavista-accent-b: #0ea5e9;
+	--lavista-bg-layer-a: #1d4ed833;
+	--lavista-bg-layer-b: #f9731633;
+	--lavista-card-bg: linear-gradient(165deg, #0f172acc 0%, #111827e6 100%);
+	--lavista-card-border: #33415599;
+	--lavista-logo-bg: linear-gradient(145deg, #0ea5e91f 0%, #f973161f 100%);
+	--lavista-logo-border: #47556980;
+	--lavista-cta-bg: linear-gradient(105deg, #f97316 0%, #0ea5e9 100%);
+	--lavista-cta-border: #93c5fd5a;
+	--lavista-cta-shadow: 0 8px 24px #0284c742;
+	--lavista-tagline: #cbd5e1;
+}
+
+body[data-theme="neon"] {
+	--lavista-bg: #02030f;
+	--lavista-fg: #e9ecff;
+	--lavista-fg-muted: #a5b4fc;
+	--lavista-accent-a: #22d3ee;
+	--lavista-accent-b: #d946ef;
+	--lavista-bg-layer-a: #a855f733;
+	--lavista-bg-layer-b: #06b6d433;
+	--lavista-card-bg: linear-gradient(165deg, #0a1027db 0%, #191138eb 100%);
+	--lavista-card-border: #6366f17d;
+	--lavista-logo-bg: linear-gradient(145deg, #22d3ee33 0%, #d946ef33 100%);
+	--lavista-logo-border: #818cf8a1;
+	--lavista-cta-bg: linear-gradient(100deg, #22d3ee 0%, #818cf8 45%, #d946ef 100%);
+	--lavista-cta-border: #c4b5fd85;
+	--lavista-cta-shadow: 0 8px 24px #8b5cf566;
+	--lavista-tagline: #dbe1ff;
+}
+
+body[data-theme="minimal"] {
+	--lavista-bg: #0a0f1f;
+	--lavista-fg: #f8fafc;
+	--lavista-fg-muted: #cbd5e1;
+	--lavista-accent-a: #e2e8f0;
+	--lavista-accent-b: #93c5fd;
+	--lavista-bg-layer-a: #94a3b81c;
+	--lavista-bg-layer-b: #64748b1f;
+	--lavista-card-bg: linear-gradient(160deg, #0f172acc 0%, #111827e6 100%);
+	--lavista-card-border: #64748b80;
+	--lavista-logo-bg: linear-gradient(145deg, #e2e8f01a 0%, #93c5fd1f 100%);
+	--lavista-logo-border: #64748b73;
+	--lavista-cta-bg: linear-gradient(100deg, #334155 0%, #1e293b 100%);
+	--lavista-cta-border: #94a3b85c;
+	--lavista-cta-shadow: 0 8px 22px #0f172a6e;
+	--lavista-tagline: #dbe2ec;
+}
+
+html,
+body {
+	background: radial-gradient(1000px 600px at 10% -10%, var(--lavista-bg-layer-a) 0%, transparent 70%),
+		radial-gradient(800px 500px at 110% 110%, var(--lavista-bg-layer-b) 0%, transparent 68%),
+		var(--lavista-bg);
+	color: var(--lavista-fg);
+}
+
+.lavista-bg-noise {
+	position: absolute;
+	inset: 0;
+	background-image: radial-gradient(rgba(148, 163, 184, 0.08) 0.5px, transparent 0.5px);
+	background-size: 3px 3px;
+	opacity: 0.25;
+	pointer-events: none;
+}
+
+.lavista-bg-orb {
+	position: absolute;
+	width: 28rem;
+	height: 28rem;
+	border-radius: 9999px;
+	filter: blur(78px);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.lavista-bg-orb-a {
+	background: #63bde74b;
+	left: -7rem;
+	top: -9rem;
+}
+
+.lavista-bg-orb-b {
+	background: #20328166;
+	right: -9rem;
+	bottom: -8rem;
+}
+
+.lavista-hero-card {
+	position: relative;
+	max-width: 36rem;
+	width: min(100%, 36rem);
+	border-radius: 1.5rem;
+	padding: 2rem 2rem 2.25rem;
+	text-align: center;
+	background: var(--lavista-card-bg);
+	border: 1px solid var(--lavista-card-border);
+	box-shadow: 0 18px 50px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(226, 232, 240, 0.09);
+	backdrop-filter: blur(8px);
+}
+
+.lavista-logo-wrap {
+	width: fit-content;
+	margin: 0 auto 1rem;
+	padding: 0.85rem;
+	border-radius: 1rem;
+	background: var(--lavista-logo-bg);
+	border: 1px solid var(--lavista-logo-border);
+}
+
+.lavista-kicker {
+	margin: 0;
+	color: var(--lavista-fg-muted);
+	font-size: 0.76rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.lavista-brand {
+	margin: 0.2rem 0 0.5rem;
+	font-size: clamp(2rem, 5.8vw, 3.15rem);
+	font-weight: 800;
+	line-height: 1;
+	background: linear-gradient(100deg, var(--lavista-accent-a), #fbbf24 38%, var(--lavista-accent-b) 78%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.lavista-tagline {
+	margin: 0 auto;
+	max-width: 30ch;
+	color: var(--lavista-tagline);
+	font-size: 1.03rem;
+	line-height: 1.55;
+}
+
+.lavista-cta {
+	display: inline-block;
+	margin-top: 1.35rem;
+	padding: 0.72rem 1.15rem;
+	border-radius: 0.72rem;
+	background: var(--lavista-cta-bg);
+	color: #f8fafc;
+	font-weight: 650;
+	text-decoration: none;
+	border: 1px solid var(--lavista-cta-border);
+	box-shadow: var(--lavista-cta-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.27);
+	transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+.lavista-cta:hover {
+	transform: translateY(-1px);
+	filter: saturate(1.08) brightness(1.05);
+	box-shadow: 0 12px 26px #0284c759, inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.lavista-cta:active {
+	transform: translateY(0);
+}
+
+.lavista-theme-switch {
+	display: inline-flex;
+	gap: 0.45rem;
+	padding: 0.35rem;
+	border-radius: 0.75rem;
+	margin-bottom: 0.75rem;
+	background: #0f172a80;
+	border: 1px solid #64748b5c;
+}
+
+.lavista-theme-btn {
+	font: inherit;
+	font-size: 0.74rem;
+	letter-spacing: 0.01em;
+	color: var(--lavista-fg-muted);
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 0.5rem;
+	padding: 0.35rem 0.52rem;
+	cursor: pointer;
+	transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.lavista-theme-btn:hover {
+	color: #f8fafc;
+	background: #33415573;
+}
+
+.lavista-theme-btn[aria-pressed="true"] {
+	color: #f8fafc;
+	background: linear-gradient(115deg, #f9731650 0%, #0ea5e950 100%);
+	border-color: #93c5fd66;
+}
+
+/* App shell (embedded viewer) */
+.lavista-app-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	padding: 1rem 1.25rem 0.85rem;
+	border-bottom: 1px solid #3341554d;
+	background: linear-gradient(180deg, #0f172a66 0%, transparent 100%);
+	backdrop-filter: blur(10px);
+}
+
+.lavista-app-brand {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 0;
+}
+
+.lavista-app-brand img {
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0.55rem;
+	flex-shrink: 0;
+	object-fit: contain;
+	background: var(--lavista-logo-bg);
+	border: 1px solid var(--lavista-logo-border);
+	box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35);
+}
+
+.lavista-app-brand-text {
+	min-width: 0;
+}
+
+.lavista-app-title {
+	margin: 0;
+	font-size: 1.05rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: var(--lavista-fg);
+	line-height: 1.2;
+}
+
+.lavista-app-sub {
+	margin: 0.15rem 0 0;
+	font-size: 0.78rem;
+	color: var(--lavista-fg-muted);
+	line-height: 1.35;
+}
+
+.lavista-app-main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 1.25rem 1rem 1.5rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.lavista-viewport-card {
+	position: relative;
+	width: min(100%, calc(800px + 2.5rem));
+	max-width: 100%;
+	padding: 0.65rem;
+	border-radius: 1.25rem;
+	background: var(--lavista-card-bg);
+	border: 1px solid var(--lavista-card-border);
+	box-shadow: 0 24px 60px rgba(2, 6, 23, 0.5), inset 0 1px 0 rgba(226, 232, 240, 0.06);
+	backdrop-filter: blur(12px);
+}
+
+.lavista-viewport-card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	padding: 1px;
+	background: linear-gradient(125deg, var(--lavista-accent-a), transparent 42%, var(--lavista-accent-b));
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	pointer-events: none;
+	opacity: 0.28;
+}
+
+.lavista-viewport-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	padding: 0.35rem 0.5rem 0.65rem;
+}
+
+.lavista-viewport-label {
+	font-size: 0.68rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--lavista-fg-muted);
+	font-weight: 600;
+}
+
+.lavista-viewport-meta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-variant-numeric: tabular-nums;
+	font-size: 0.72rem;
+	color: var(--lavista-fg-muted);
+}
+
+.lavista-viewport-meta kbd {
+	font: inherit;
+	padding: 0.12rem 0.4rem;
+	border-radius: 0.35rem;
+	background: #0f172a99;
+	border: 1px solid #47556966;
+	color: var(--lavista-tagline);
+}
+
+.lavista-canvas-frame {
+	position: relative;
+	border-radius: 0.85rem;
+	overflow: hidden;
+	background: #020617;
+	border: 1px solid #1e293b99;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.lavista-canvas-frame canvas {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: min(70dvh, 600px);
+	object-fit: contain;
+}
+
+.lavista-viewport-status code {
+	font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+	font-size: 0.88em;
+	padding: 0.1rem 0.35rem;
+	border-radius: 0.35rem;
+	background: #0f172a99;
+	border: 1px solid #47556955;
+	color: var(--lavista-tagline);
+}
+
+.lavista-viewport-status {
+	margin: 0;
+	padding: 0.65rem 0.5rem 0.15rem;
+	font-size: 0.8rem;
+	color: var(--lavista-fg-muted);
+	text-align: center;
+	line-height: 1.45;
+}
+
+.lavista-viewport-status strong {
+	color: var(--lavista-tagline);
+	font-weight: 600;
+}
+
+.lavista-app-footer {
+	padding: 0.65rem 1.25rem 1.1rem;
+	text-align: center;
+	font-size: 0.72rem;
+	color: var(--lavista-fg-muted);
+	border-top: 1px solid #33415538;
+}
+
+.lavista-app-footer a {
+	color: var(--lavista-accent-b);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.lavista-app-footer a:hover {
+	text-decoration: underline;
+}

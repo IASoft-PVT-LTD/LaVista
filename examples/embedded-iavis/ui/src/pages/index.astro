@@ -1,0 +1,67 @@
+---
+import "../styles/global.css";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+	title="Embedded IAVIS · LaVista"
+	description="Live 800×600 framebuffer from the embedded LaVista host."
+>
+	<header class="lavista-app-header">
+		<div class="lavista-app-brand">
+			<img src="/logo-mark.png" alt="" width="36" height="36" decoding="async" />
+			<div class="lavista-app-brand-text">
+				<h1 class="lavista-app-title">Embedded IAVIS</h1>
+				<p class="lavista-app-sub">LaVista framebuffer viewer</p>
+			</div>
+		</div>
+		<div class="lavista-theme-switch" role="group" aria-label="Color theme">
+			<button type="button" class="lavista-theme-btn" data-lavista-theme="" aria-pressed="true">Studio</button>
+			<button type="button" class="lavista-theme-btn" data-lavista-theme="neon" aria-pressed="false">Neon</button>
+			<button type="button" class="lavista-theme-btn" data-lavista-theme="minimal" aria-pressed="false">Minimal</button>
+		</div>
+	</header>
+
+	<main class="lavista-app-main">
+		<div class="lavista-viewport-card">
+			<div class="lavista-viewport-toolbar">
+				<span class="lavista-viewport-label">Live view</span>
+				<span class="lavista-viewport-meta">
+					<kbd>800</kbd>×<kbd>600</kbd>
+					<span aria-hidden="true">·</span>
+					<span>RGBA</span>
+				</span>
+			</div>
+			<div class="lavista-canvas-frame">
+				<canvas id="iavis-embed" width="800" height="600" aria-label="IAVIS framebuffer"></canvas>
+			</div>
+			<p class="lavista-viewport-status">
+				<strong>Listening</strong> for binary frames from the host via <code>liblavista</code>.
+			</p>
+		</div>
+	</main>
+
+	<footer class="lavista-app-footer">
+		<a href="https://github.com/I-A-S/LaVista" rel="noopener noreferrer">LaVista</a>
+		embed · UI built with <a href="https://astro.build" rel="noopener noreferrer">Astro</a>
+	</footer>
+
+	<script>
+		import { onBinaryData } from "liblavista";
+
+		document.addEventListener("DOMContentLoaded", () => {
+			const canvas = document.getElementById("iavis-embed") as HTMLCanvasElement;
+			if (!canvas) return;
+			const ctx = canvas.getContext("2d");
+			if (!ctx) return;
+
+			onBinaryData((buffer) => {
+				const clamped = new Uint8ClampedArray(buffer);
+				if (clamped.length === 800 * 600 * 4) {
+					const imgData = new ImageData(clamped, 800, 600);
+					ctx.putImageData(imgData, 0, 0);
+				}
+			});
+		});
+	</script>
+</Layout>

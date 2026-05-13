@@ -24,6 +24,7 @@
 #include <system_error>
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STBIDEF static
 #include <stb_image.h>
 
 namespace LaVista
@@ -505,7 +506,7 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
     return html;
   }
 
-  auto load_inline_html_into_webview(webview_t w, String html_document) -> Result<void>
+  auto load_inline_html_into_webview(Window window, webview_t w, String html_document) -> Result<void>
   {
     AU_TRY_VAR(temp_root, filesystem::temp_directory_path());
     filesystem::Path temp_html = std::move(temp_root);
@@ -519,6 +520,11 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
         return fail("Cannot write temporary HTML: %s", temp_html.string().c_str());
       }
       out.write(html_document.data(), static_cast<std::streamsize>(html_document.size()));
+    }
+
+    if (window != nullptr)
+    {
+      window->temp_files.push_back(temp_html);
     }
 
     const String file_url = to_file_url(temp_html);
@@ -536,7 +542,7 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
 
 namespace LaVista::utils
 {
-  auto load_spa_bundle_file_scheme(webview_t w, const filesystem::Path &index_html,
+  auto load_spa_bundle_file_scheme(Window window, webview_t w, const filesystem::Path &index_html,
                                    const filesystem::Path &bundle_dir_abs) -> Result<void>
   {
     AU_TRY_VAR(html_raw, read_file_utf8(index_html));
@@ -554,6 +560,11 @@ namespace LaVista::utils
         return fail("Cannot write temporary SPA HTML: %s", temp_html.string().c_str());
       }
       out.write(html.data(), static_cast<std::streamsize>(html.size()));
+    }
+
+    if (window != nullptr)
+    {
+      window->temp_files.push_back(temp_html);
     }
 
     const String file_url = to_file_url(temp_html);

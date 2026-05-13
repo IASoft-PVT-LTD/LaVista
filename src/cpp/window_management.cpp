@@ -140,7 +140,9 @@ namespace LaVista
 
   static auto drag_strip_region_valid(const WindowDragStripOptions &o) -> bool
   {
-    return o.end_x_percentage > o.start_x_percentage && o.end_y_percentage > o.start_y_percentage;
+    const bool valid_pct = o.end_x_percentage > o.start_x_percentage && o.end_y_percentage > o.start_y_percentage;
+    const bool valid_px = o.end_x_px > o.start_x_px && o.end_y_px > o.start_y_px;
+    return valid_pct || valid_px || o.end_x_px >= 0 || o.end_y_px >= 0;
   }
 
   static auto format_drag_strip_eval_assign(const WindowDragStripOptions &o) -> String
@@ -151,9 +153,14 @@ namespace LaVista
                   "window.__lavistaDragStrip.sx=%.9g;"
                   "window.__lavistaDragStrip.sy=%.9g;"
                   "window.__lavistaDragStrip.ex=%.9g;"
-                  "window.__lavistaDragStrip.ey=%.9g;",
+                  "window.__lavistaDragStrip.ey=%.9g;"
+                  "window.__lavistaDragStrip.spx=%d;"
+                  "window.__lavistaDragStrip.spy=%d;"
+                  "window.__lavistaDragStrip.epx=%d;"
+                  "window.__lavistaDragStrip.epy=%d;",
                   static_cast<double>(o.start_x_percentage), static_cast<double>(o.start_y_percentage),
-                  static_cast<double>(o.end_x_percentage), static_cast<double>(o.end_y_percentage));
+                  static_cast<double>(o.end_x_percentage), static_cast<double>(o.end_y_percentage),
+                  o.start_x_px, o.start_y_px, o.end_x_px, o.end_y_px);
     return String(buf);
   }
 
@@ -198,20 +205,24 @@ namespace LaVista
     char init_buf[1152];
     std::snprintf(init_buf, sizeof(init_buf),
                   "(function(){"
-                  "window.__lavistaDragStrip={sx:%.9g,sy:%.9g,ex:%.9g,ey:%.9g};"
+                  "window.__lavistaDragStrip={sx:%.9g,sy:%.9g,ex:%.9g,ey:%.9g,spx:%d,spy:%d,epx:%d,epy:%d};"
                   "if(window.__lavistaDragMouseDownInstalled)return;"
                   "window.__lavistaDragMouseDownInstalled=true;"
                   "document.addEventListener('mousedown',function(e){"
                   "var o=window.__lavistaDragStrip;if(!o)return;"
                   "if(e.target.closest('button,a,[data-lavista-no-drag]'))return;"
                   "var w=window.innerWidth,h=window.innerHeight;"
-                  "var left=w*o.sx/100.0,top=h*o.sy/100.0,right=w*o.ex/100.0,bottom=h*o.ey/100.0;"
+                  "var left=o.spx>=0?o.spx:w*o.sx/100.0;"
+                  "var top=o.spy>=0?o.spy:h*o.sy/100.0;"
+                  "var right=o.epx>=0?o.epx:w*o.ex/100.0;"
+                  "var bottom=o.epy>=0?o.epy:h*o.ey/100.0;"
                   "if(e.button===0&&e.clientX>=left&&e.clientX<right&&e.clientY>=top&&e.clientY<bottom){"
                   "if(window.startWindowDrag)window.startWindowDrag();}"
                   "},true);"
                   "})();",
                   static_cast<double>(opts.start_x_percentage), static_cast<double>(opts.start_y_percentage),
-                  static_cast<double>(opts.end_x_percentage), static_cast<double>(opts.end_y_percentage));
+                  static_cast<double>(opts.end_x_percentage), static_cast<double>(opts.end_y_percentage),
+                  opts.start_x_px, opts.start_y_px, opts.end_x_px, opts.end_y_px);
 
     /* webview_init only registers scripts via AddScriptToExecuteOnDocumentCreated (WebView2) /
      * WebKitUserScript (GTK) for *future* navigations. The titlebar/content page is already loaded by the time we
@@ -499,7 +510,7 @@ namespace LaVista
     }
 
     const String doc = wrap_titlebar_html_body(html);
-    auto nav = _internal::load_inline_html_into_webview(window->titlebar_webview, doc);
+    auto nav = _internal::load_inline_html_into_webview(window, window->titlebar_webview, doc);
     if (nav.is_err())
     {
       if (created_now)
@@ -662,7 +673,7 @@ namespace LaVista
 
     AU_TRY_VAR(bundle_dir_abs, filesystem::absolute(bundle_dir));
 
-    auto spa_result = _internal::load_spa_bundle_into_webview(window->webview, index_html, bundle_dir_abs);
+    auto spa_result = _internal::load_spa_bundle_into_webview(window, window->webview, index_html, bundle_dir_abs);
     if (spa_result.is_err())
     {
       (void) destroy_window(window);
@@ -675,6 +686,17 @@ namespace LaVista
       {
         (void) destroy_window(window);
         return fail(std::move(chrome.unwrap_err()));
+      }
+    }
+
+    {
+      auto handshake_bind = bind_window_function(window, "LaVista_Handshake", [](const String &) -> String {
+        return "\"OK\"";
+      });
+      if (handshake_bind.is_err())
+      {
+        (void) destroy_window(window);
+        return fail(std::move(handshake_bind.unwrap_err()));
       }
     }
 
@@ -739,6 +761,13 @@ namespace LaVista
         window->webview = nullptr;
         window->running = false;
         _internal::platform_destroy_native(window);
+
+        for (const auto& temp_file : window->temp_files)
+        {
+          std::error_code ec;
+          filesystem::fs::remove(temp_file, ec);
+        }
+
         delete window;
         return fail(std::move(tb_destroy.unwrap_err()));
       }
@@ -749,6 +778,12 @@ namespace LaVista
     window->running = false;
 
     _internal::platform_destroy_native(window);
+
+    for (const auto& temp_file : window->temp_files)
+    {
+      std::error_code ec;
+      filesystem::fs::remove(temp_file, ec);
+    }
 
     delete window;
     return destroy_result;

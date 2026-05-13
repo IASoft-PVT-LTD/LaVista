@@ -19,8 +19,10 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkmemorytexture.h>
 #include <gtk/gtk.h>
+#include <webkit/webkit.h>
 
 #include <cstring>
+#include <string>
 
 #if defined(GDK_WINDOWING_X11)
 #  include <X11/Xlib.h>
@@ -184,6 +186,35 @@ namespace LaVista::_internal
       state.platform.gtk_window = nullptr;
       return fail("webview UI widget is null");
     }
+
+    WebKitWebContext *context = webkit_web_view_get_context(WEBKIT_WEB_VIEW(content_widget));
+    webkit_web_context_register_uri_scheme(
+        context, "lavista-bin",
+        [](WebKitURISchemeRequest *request, gpointer user_data) {
+          auto *window_state = static_cast<Window>(user_data);
+          const char *path = webkit_uri_scheme_request_get_path(request);
+          String id = path;
+          if (!id.empty() && id.data()[0] == '/')
+          {
+            id.assign(id.substr(1));
+          }
+          Vec<u8> *const buf = window_state->pending_binary_buffers.find(id);
+          if (buf != nullptr)
+          {
+            GInputStream *stream = g_memory_input_stream_new_from_data(buf->data(), buf->size(), nullptr);
+            webkit_uri_scheme_request_finish(request, stream, static_cast<gint64>(buf->size()),
+                                             "application/octet-stream");
+            g_object_unref(stream);
+            (void) window_state->pending_binary_buffers.erase(id);
+          }
+          else
+          {
+            GError *error = g_error_new(G_FILE_ERROR, G_FILE_ERROR_NOENT, "Buffer not found");
+            webkit_uri_scheme_request_finish_error(request, error);
+            g_error_free(error);
+          }
+        },
+        &state, nullptr);
 
     /* Lift the widget out of window_widget's child slot before installing our box, otherwise
      * gtk_window_set_child(window_widget, box) would unparent (and potentially destroy) it. */
@@ -456,3 +487,29 @@ namespace LaVista::_internal
     gtk_widget_set_size_request(tb_widget, -1, tb_h);
   }
 } // namespace LaVista::_internal
+
+#if defined(__linux__) && !defined(__ANDROID__)
+namespace LaVista
+{
+  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+
+    window->next_binary_buffer_id++;
+    String id = std::to_string(window->next_binary_buffer_id).c_str();
+    Vec<u8> bytes;
+    const usize n = static_cast<usize>(buffer.size());
+    bytes.resize(n);
+    if (n > 0)
+    {
+      std::memcpy(bytes.data(), buffer.data(), n);
+    }
+    (void) window->pending_binary_buffers.insert(id, std::move(bytes));
+
+    return dispatch_window_event_text(window, "lavista-bin-ready", id);
+  }
+}
+#endif

@@ -1,0 +1,113 @@
+---
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = "LaVista · Embedded IAVIS",
+	description = "Live framebuffer from the embedded LaVista host.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<link rel="icon" href="/logo-mark.png" />
+		<meta name="generator" content={Astro.generator} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<title>{title}</title>
+	</head>
+	<body class="lavista-body">
+		<div class="lavista-bg-stage" aria-hidden="true">
+			<div class="lavista-bg-orb lavista-bg-orb-a"></div>
+			<div class="lavista-bg-orb lavista-bg-orb-b"></div>
+			<div class="lavista-bg-noise"></div>
+		</div>
+		<div class="lavista-app-shell">
+			<slot />
+		</div>
+		<script is:inline>
+			(function () {
+				var key = "lavista-embed-theme";
+				var allowed = ["", "neon", "minimal"];
+				function readSaved() {
+					try {
+						return localStorage.getItem(key);
+					} catch (e) {
+						return null;
+					}
+				}
+				function applyBody(theme) {
+					if (theme) document.body.setAttribute("data-theme", theme);
+					else document.body.removeAttribute("data-theme");
+				}
+				function syncThemeButtons() {
+					var current = document.body.getAttribute("data-theme") || "";
+					document.querySelectorAll("[data-lavista-theme]").forEach(function (b) {
+						var th = b.getAttribute("data-lavista-theme") || "";
+						b.setAttribute("aria-pressed", th === current ? "true" : "false");
+					});
+				}
+				var saved = readSaved();
+				var v = saved && allowed.indexOf(saved) !== -1 ? saved : "";
+				applyBody(v);
+				syncThemeButtons();
+				document.addEventListener("click", function (ev) {
+					var t = ev.target;
+					if (!(t instanceof HTMLElement)) return;
+					var btn = t.closest("[data-lavista-theme]");
+					if (!btn || btn.tagName !== "BUTTON") return;
+					var theme = btn.getAttribute("data-lavista-theme") || "";
+					if (allowed.indexOf(theme) === -1) return;
+					applyBody(theme);
+					try {
+						localStorage.setItem(key, theme);
+					} catch (e) {}
+					syncThemeButtons();
+				});
+			})();
+		</script>
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		min-height: 100%;
+	}
+
+	.lavista-body {
+		position: relative;
+		user-select: none;
+		font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: geometricPrecision;
+	}
+
+	.lavista-bg-stage {
+		position: fixed;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.lavista-app-shell {
+		position: relative;
+		z-index: 1;
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
+	}
+</style>

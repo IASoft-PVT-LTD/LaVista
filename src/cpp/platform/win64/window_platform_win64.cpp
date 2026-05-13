@@ -541,3 +541,106 @@ namespace LaVista::_internal
     }
   }
 } // namespace LaVista::_internal
+
+namespace LaVista
+{
+  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>
+  {
+    if (window == nullptr || window->webview == nullptr)
+    {
+      return fail("Window or webview is null");
+    }
+
+    void *const raw = webview_get_native_handle(window->webview, WEBVIEW_NATIVE_HANDLE_KIND_BROWSER_CONTROLLER);
+    if (raw == nullptr)
+    {
+      return fail("WebView2 controller handle unavailable");
+    }
+
+    auto *const controller = static_cast<ICoreWebView2Controller *>(raw);
+    ICoreWebView2 *core = nullptr;
+    if (FAILED(controller->get_CoreWebView2(&core)) || core == nullptr)
+    {
+      return fail("get_CoreWebView2 failed");
+    }
+
+    ICoreWebView2_17 *core17 = nullptr;
+    if (FAILED(core->QueryInterface(IID_ICoreWebView2_17, reinterpret_cast<void **>(&core17))) || core17 == nullptr)
+    {
+      core->Release();
+      return fail("ICoreWebView2_17 is not available; update the WebView2 runtime");
+    }
+
+    ICoreWebView2_2 *core2 = nullptr;
+    if (FAILED(core->QueryInterface(IID_ICoreWebView2_2, reinterpret_cast<void **>(&core2))) || core2 == nullptr)
+    {
+      core17->Release();
+      core->Release();
+      return fail("ICoreWebView2_2 is not available");
+    }
+
+    ICoreWebView2Environment *env = nullptr;
+    if (FAILED(core2->get_Environment(&env)) || env == nullptr)
+    {
+      core2->Release();
+      core17->Release();
+      core->Release();
+      return fail("get_Environment failed");
+    }
+
+    ICoreWebView2Environment12 *env12 = nullptr;
+    if (FAILED(env->QueryInterface(IID_ICoreWebView2Environment12, reinterpret_cast<void **>(&env12))) || env12 == nullptr)
+    {
+      env->Release();
+      core2->Release();
+      core17->Release();
+      core->Release();
+      return fail("ICoreWebView2Environment12 is not available; update the WebView2 runtime");
+    }
+
+    ICoreWebView2SharedBuffer *shared_buffer = nullptr;
+    if (FAILED(env12->CreateSharedBuffer(buffer.size(), &shared_buffer)) || shared_buffer == nullptr)
+    {
+      env12->Release();
+      env->Release();
+      core2->Release();
+      core17->Release();
+      core->Release();
+      return fail("CreateSharedBuffer failed");
+    }
+
+    BYTE *data = nullptr;
+    if (FAILED(shared_buffer->get_Buffer(&data)) || data == nullptr)
+    {
+      shared_buffer->Release();
+      env12->Release();
+      env->Release();
+      core2->Release();
+      core17->Release();
+      core->Release();
+      return fail("get_Buffer failed");
+    }
+
+    std::memcpy(data, buffer.data(), buffer.size());
+
+    if (FAILED(core17->PostSharedBufferToScript(shared_buffer, COREWEBVIEW2_SHARED_BUFFER_ACCESS_READ_ONLY, L"\"\"")))
+    {
+      shared_buffer->Release();
+      env12->Release();
+      env->Release();
+      core2->Release();
+      core17->Release();
+      core->Release();
+      return fail("PostSharedBufferToScript failed");
+    }
+
+    shared_buffer->Release();
+    env12->Release();
+    env->Release();
+    core2->Release();
+    core17->Release();
+    core->Release();
+
+    return {};
+  }
+} // namespace LaVista

@@ -8,7 +8,7 @@
       "name": "(Windows) Launch",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/out/build/LaVista-x64-windows-clang/bin/Debug/HelloLaVista.exe",
+      "program": "${workspaceFolder}/out/build/LaVista-x64-windows-clang/bin/Debug/EmbeddedIAVis.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}/",

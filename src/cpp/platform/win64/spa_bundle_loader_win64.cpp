@@ -18,9 +18,10 @@
 
 namespace LaVista::_internal
 {
-  auto load_spa_bundle_into_webview(webview_t w, const filesystem::Path &index_html,
+  auto load_spa_bundle_into_webview(Window window, webview_t w, const filesystem::Path &index_html,
                                     const filesystem::Path &bundle_dir_abs) -> Result<void>
   {
+    (void) window;
     (void) index_html;
     auto map_result = map_webview2_spa_virtual_host(w, bundle_dir_abs);
     if (map_result.is_err())
