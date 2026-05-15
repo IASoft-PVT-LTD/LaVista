@@ -1,17 +1,11 @@
 // LaVista: A Modern Platform for C++ Desktop Apps.
-// Copyright (C) 2026 IAS (ias@iasoft.dev)
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Copyright (C) 2026 I-A-S (ias@iasoft.dev)
+// Copyright (C) 2026 IASoft (PVT) LTD (contact@iasoft.dev)
 //
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// This source code is licensed under the PolyForm Noncommercial License 1.0.0.
+// A copy of this license is included in the LICENSE file at the root of this project,
+// and is also available at <https://polyformproject.org/licenses/noncommercial/1.0.0>.
 
 #include <LaVista_internal.hpp>
 
@@ -159,8 +153,8 @@ namespace LaVista
                   "window.__lavistaDragStrip.epx=%d;"
                   "window.__lavistaDragStrip.epy=%d;",
                   static_cast<double>(o.start_x_percentage), static_cast<double>(o.start_y_percentage),
-                  static_cast<double>(o.end_x_percentage), static_cast<double>(o.end_y_percentage),
-                  o.start_x_px, o.start_y_px, o.end_x_px, o.end_y_px);
+                  static_cast<double>(o.end_x_percentage), static_cast<double>(o.end_y_percentage), o.start_x_px,
+                  o.start_y_px, o.end_x_px, o.end_y_px);
     return String(buf);
   }
 
@@ -690,9 +684,8 @@ namespace LaVista
     }
 
     {
-      auto handshake_bind = bind_window_function(window, "LaVista_Handshake", [](const String &) -> String {
-        return "\"OK\"";
-      });
+      auto handshake_bind =
+          bind_window_function(window, "LaVista_Handshake", [](const String &) -> String { return "\"OK\""; });
       if (handshake_bind.is_err())
       {
         (void) destroy_window(window);
@@ -762,7 +755,7 @@ namespace LaVista
         window->running = false;
         _internal::platform_destroy_native(window);
 
-        for (const auto& temp_file : window->temp_files)
+        for (const auto &temp_file : window->temp_files)
         {
           std::error_code ec;
           filesystem::fs::remove(temp_file, ec);
@@ -779,7 +772,7 @@ namespace LaVista
 
     _internal::platform_destroy_native(window);
 
-    for (const auto& temp_file : window->temp_files)
+    for (const auto &temp_file : window->temp_files)
     {
       std::error_code ec;
       filesystem::fs::remove(temp_file, ec);

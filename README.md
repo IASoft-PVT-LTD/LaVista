@@ -161,4 +161,4 @@ AU_TRY_DISCARD(LaVista::destroy_window(window));
 
 ## License
 
-Copyright (C) 2026 IASoft PVT LTD. Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright © 2026 IASoft (PVT) LTD. Licensed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
