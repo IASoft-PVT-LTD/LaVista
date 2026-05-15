@@ -2,7 +2,6 @@
   <img src="logo.png" alt="LaVista" width="190" style="border-radius: 1.15rem;"/>
   <br/>
 
-  <img src="https://img.shields.io/badge/license-Apache_v2-darkblue.svg" alt="License"/>
   <img src="https://img.shields.io/badge/standard-C%2B%2B20-darkgreen.svg" alt="C++20"/>
   <img src="https://img.shields.io/badge/platform-Win64%20%7C%20Linux-purple.svg" alt="Platform"/>
   <img src="https://img.shields.io/badge/compiler-MSVC%20%7C%20Clang-darkred.svg" alt="Compiler"/>
