@@ -11,9 +11,6 @@ module;
 
 #include <auxid/macros.hpp>
 
-import auxid;
-import lavista.definitions;
-
 #include <chrono>
 #include <cctype>
 #include <cmath>
@@ -22,6 +19,7 @@ import lavista.definitions;
 #include <filesystem>
 #include <fstream>
 #include <system_error>
+#include <utility>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBIDEF static
@@ -30,8 +28,6 @@ import lavista.definitions;
 #define WEBVIEW_HEADER
 #include <webview/webview.h>
 #undef WEBVIEW_HEADER
-
-#include <utility>
 
 module lavista.internal;
 

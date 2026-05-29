@@ -11,14 +11,13 @@ module;
 
 #include <auxid/macros.hpp>
 
-import lavista.internal;
-import lavista.definitions;
-
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 
 module lavista;
+
+import lavista.internal;
 
 namespace LaVista
 {

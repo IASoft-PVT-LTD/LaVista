@@ -11,14 +11,15 @@
 
 #include <utility>
 
-import lavista;
-import iavis;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #if defined(_WIN32)
 #  include <windows.h>
 #endif
+
+import lavista;
+import iavis;
 
 using namespace au;
 

@@ -107,6 +107,11 @@ namespace LaVista::_internal
   {
   }
 
+  auto platform_post_binary_data(Window, const Span<const u8> &) -> Result<String>
+  {
+    return fail("post_binary_data is not available on this platform");
+  }
+
   auto load_spa_bundle_into_webview(webview_t w, const filesystem::Path &index_html,
                                     const filesystem::Path &bundle_dir_abs) -> Result<void>
   {

@@ -20,7 +20,7 @@
 
 LaVista is a C++23 library designed to host single-page application (SPA) bundles within an **OS-native webview**. It provides robust windowing and display management for **Windows** and **Linux**.
 
-Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid) (an Orthodox C++ core), leverages [webview](https://github.com/webview/webview) for the embedded browser, and uses [stb_image](https://github.com/nothings/stb) for window icon decoding. Other platforms currently use a minimal stub for development, but primary support and CI are focused on Windows and Linux x64.
+Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid), leverages [webview](https://github.com/webview/webview) for the embedded browser. Other platforms currently use a minimal stub for development, but primary support and CI are focused on Windows and Linux x64.
 
 <p align="center">
   <img src="example.png" alt="LaVista sample window with host title bar and SPA content"/>
@@ -28,7 +28,6 @@ Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid) (
 <p align="center">
   <img src="example-embedded-iavis.png" alt="LaVista sample window with host title bar and SPA content with IAVis embedded, off-screen rendering to a canvas"/>
 </p>
-
 
 ## Features
 
@@ -46,7 +45,7 @@ Under the hood, LaVista is built on [LibAuxid](https://github.com/I-A-S/Auxid) (
 
 - **CMake** - Version 3.28+ (required for C++ modules and the provided [CMake presets](CMakePresets.json)).
 - **Git** - Must include submodule support (LibAuxid is expected at `libauxid/`).
-- **C++23 Compiler** - MSVC or Clang, matching [LibAuxid](https://github.com/I-A-S/Auxid) and your chosen preset.
+- **C++23 Compiler** - MSVC, Clang or GCC (15.2+), matching [LibAuxid](https://github.com/I-A-S/Auxid) and your chosen preset.
 
 ### Linux (Debian-based)
 
@@ -61,7 +60,7 @@ Note: *X11 development libraries are required where CMake resolves `X11` (see `s
 
 ### Windows
 
-Use **Visual Studio 2022** with preset `LaVista-x64-windows`, or **Ninja** with `LaVista-x64-windows-msvc` / `LaVista-x64-windows-clang`. CI enables the MSVC environment with [ilammy/msvc-dev-cmd](https://github.com/ilammy/msvc-dev-cmd) before configuring.
+Use **Visual Studio 2026** with preset `LaVista-x64-windows`, or **Ninja** with `LaVista-x64-windows-msvc` / `LaVista-x64-windows-clang`. CI enables the MSVC environment with [ilammy/msvc-dev-cmd](https://github.com/ilammy/msvc-dev-cmd) before configuring.
 
 ## Quick start
 
@@ -84,7 +83,7 @@ cmake --preset LaVista-x64-linux
 cmake --build --preset LaVista-x64-linux --config Release
 ```
 
-**Windows (Visual Studio 2022)**
+**Windows (Visual Studio 2026)**
 
 ```bash
 cmake --preset LaVista-x64-windows

@@ -11,22 +11,20 @@ module;
 
 #include <auxid/macros.hpp>
 
-import lavista.internal;
-import lavista.definitions;
-
 #include <cctype>
 #include <cstdio>
 #include <filesystem>
 #include <functional>
 #include <system_error>
+#include <utility>
 
 #define WEBVIEW_HEADER
 #include <webview/webview.h>
 #undef WEBVIEW_HEADER
 
-#include <utility>
-
 module lavista;
+
+import lavista.internal;
 
 namespace LaVista
 {
@@ -1087,6 +1085,16 @@ namespace LaVista
   {
     const String detail_json = json_escape_for_string_literal(StringView(detail_text.c_str(), detail_text.size()));
     return dispatch_window_event(window, event_name, detail_json);
+  }
+
+  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>
+  {
+    AU_TRY_VAR(tag, _internal::platform_post_binary_data(window, buffer));
+    if (!tag.empty())
+    {
+      return dispatch_window_event_text(window, "lavista-bin-ready", tag);
+    }
+    return {};
   }
 
 } // namespace LaVista

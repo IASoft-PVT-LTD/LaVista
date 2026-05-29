@@ -545,9 +545,9 @@ namespace LaVista::_internal
   }
 } // namespace LaVista::_internal
 
-namespace LaVista
+namespace LaVista::_internal
 {
-  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>
+  auto platform_post_binary_data(Window window, const Span<const u8> &buffer) -> Result<String>
   {
     if (window == nullptr || window_ptr(window)->webview == nullptr)
     {
@@ -645,6 +645,6 @@ namespace LaVista
     core17->Release();
     core->Release();
 
-    return {};
+    return String{};
   }
-} // namespace LaVista
+} // namespace LaVista::_internal

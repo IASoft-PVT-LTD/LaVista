@@ -9,8 +9,6 @@
 
 module;
 
-import lavista.definitions;
-
 #include <cctype>
 #include <cstdlib>
 #include <cstring>

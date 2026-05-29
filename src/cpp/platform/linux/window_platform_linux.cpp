@@ -484,9 +484,9 @@ namespace LaVista::_internal
 } // namespace LaVista::_internal
 
 #if defined(__linux__) && !defined(__ANDROID__)
-namespace LaVista
+namespace LaVista::_internal
 {
-  auto post_binary_data(Window window, const Span<const u8> &buffer) -> Result<void>
+  auto platform_post_binary_data(Window window, const Span<const u8> &buffer) -> Result<String>
   {
     if (window == nullptr)
     {
@@ -504,7 +504,7 @@ namespace LaVista
     }
     (void) window_ptr(window)->pending_binary_buffers.insert(id, std::move(bytes));
 
-    return dispatch_window_event_text(window, "lavista-bin-ready", id);
+    return id;
   }
-} // namespace LaVista
+} // namespace LaVista::_internal
 #endif

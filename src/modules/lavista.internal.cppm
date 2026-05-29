@@ -143,6 +143,9 @@ export namespace LaVista
     auto load_inline_html_into_webview(Window window, webview_t w, String html_document) -> Result<void>;
 
     auto build_default_titlebar_html(const String &window_title, const String &icon_path) -> Result<String>;
+
+    /** Posts platform-native binary data to the SPA. Returns a non-empty tag on Linux (for JS dispatch); empty on Windows. */
+    auto platform_post_binary_data(Window window, const Span<const u8> &buffer) -> Result<String>;
   } // namespace _internal
 
   namespace utils
