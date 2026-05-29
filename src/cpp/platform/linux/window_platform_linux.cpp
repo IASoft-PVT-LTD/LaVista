@@ -17,12 +17,16 @@ module;
 #include <cstring>
 #include <string>
 
-module lavista.internal;
-
 #if defined(GDK_WINDOWING_X11)
 #  include <X11/Xlib.h>
 #  include <gdk/x11/gdkx.h>
 #endif
+
+#define WEBVIEW_HEADER
+#include <webview/webview.h>
+#undef WEBVIEW_HEADER
+
+module lavista.internal;
 
 namespace LaVista::_internal
 {
@@ -186,7 +190,7 @@ namespace LaVista::_internal
     webkit_web_context_register_uri_scheme(
         context, "lavista-bin",
         [](WebKitURISchemeRequest *request, gpointer user_data) {
-          auto *window_state = static_cast<Window>(user_data);
+          Window_T *const window_state = window_ptr(static_cast<Window>(user_data));
           const char *path = webkit_uri_scheme_request_get_path(request);
           String id = path;
           if (!id.empty() && id.data()[0] == '/')
@@ -243,7 +247,7 @@ namespace LaVista::_internal
     }
 
     g_signal_connect(G_OBJECT(window_widget), "destroy", G_CALLBACK(+[](GtkWidget *, gpointer user_data) {
-                       auto *const window_state = reinterpret_cast<Window>(user_data);
+                       Window_T *const window_state = window_ptr(reinterpret_cast<Window>(user_data));
                        if (window_state != nullptr)
                        {
                          window_state->running = false;

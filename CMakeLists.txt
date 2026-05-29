@@ -21,11 +21,6 @@ else()
     add_subdirectory(libauxid)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND TARGET libauxid)
-    find_package(Threads REQUIRED)
-    target_link_libraries(libauxid PUBLIC Threads::Threads)
-endif()
-
 auxid_setup_project()
 
 option(LaVista_BUILD_EXAMPLES "Build examples" ${LaVista_IS_TOP_LEVEL})

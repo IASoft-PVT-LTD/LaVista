@@ -59,8 +59,9 @@ namespace LaVista
     auto build_nfd_filter_list(const Span<const char *const> &filters) -> String
     {
       String out;
-      for (const char *const f : filters)
+      for (usize i = 0; i < filters.size(); ++i)
       {
+        const char *const f = filters[i];
         if (f == nullptr)
         {
           continue;

@@ -12,11 +12,11 @@ module;
 #include <algorithm>
 
 #include <gtk/gtk.h>
-
-module lavista.internal;
 #if defined(GDK_WINDOWING_X11)
 #  include <gdk/x11/gdkx.h>
 #endif
+
+module lavista.internal;
 
 namespace LaVista::_internal
 {
