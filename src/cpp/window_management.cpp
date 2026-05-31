@@ -7,6 +7,11 @@
 // A copy of this license is included in the LICENSE file at the root of this project,
 // and is also available at <https://polyformproject.org/licenses/noncommercial/1.0.0>.
 
+/**
+ * @file window_management.cpp
+ * @brief Window lifecycle, title bar, event bindings, and SPA integration implementations.
+ */
+
 module;
 
 #include <auxid/macros.hpp>

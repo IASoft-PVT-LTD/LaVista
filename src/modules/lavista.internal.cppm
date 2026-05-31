@@ -22,6 +22,7 @@ export module lavista.internal;
 import auxid;
 import lavista.definitions;
 
+/** @cond INTERNAL */
 export namespace LaVista
 {
   using namespace au;
@@ -144,7 +145,6 @@ export namespace LaVista
 
     auto build_default_titlebar_html(const String &window_title, const String &icon_path) -> Result<String>;
 
-    /** Posts platform-native binary data to the SPA. Returns a non-empty tag on Linux (for JS dispatch); empty on Windows. */
     auto platform_post_binary_data(Window window, const Span<const u8> &buffer) -> Result<String>;
   } // namespace _internal
 
@@ -158,3 +158,4 @@ export namespace LaVista
                                      const filesystem::Path &bundle_dir_abs) -> Result<void>;
   } // namespace utils
 } // namespace LaVista
+/** @endcond */

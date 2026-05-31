@@ -7,6 +7,11 @@
 // A copy of this license is included in the LICENSE file at the root of this project,
 // and is also available at <https://polyformproject.org/licenses/noncommercial/1.0.0>.
 
+/**
+ * @file file_dialogs.cpp
+ * @brief Native file and folder dialog implementations (Native File Dialog).
+ */
+
 module;
 
 #include <cctype>

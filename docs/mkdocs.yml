@@ -1,0 +1,40 @@
+site_name: LaVista
+site_description: A modern platform for C++ desktop apps
+docs_dir: docs
+use_directory_urls: true
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdoxy:
+      projects:
+        lavista:
+          src-dirs: ../src/modules ../src/cpp
+          full-doc: true
+          doxy-cfg-file: ../Doxyfile
+          doxy-cfg:
+            FILE_PATTERNS: "*.cppm *.cpp"
+            RECURSIVE: NO
+            EXTRACT_ALL: NO
+            INTERNAL_DOCS: NO
+            BUILTIN_STL_SUPPORT: YES
+            MARKDOWN_SUPPORT: YES
+            EXCLUDE: ../src/modules/lavista.internal.cppm ../src/cpp/internal_internal.cpp
+
+nav:
+  - Home: index.md
+  - Frontend: liblavista.md
+  - API Reference:
+      - Overview: lavista/links.md
+      - Module Interface: lavista/lavista_8cppm.md
+      - Definitions: lavista/lavista_8definitions_8cppm.md
+      - LaVista Namespace: lavista/namespace_la_vista.md
+      - Namespaces: lavista/namespaces.md
+      - Classes: lavista/classes.md
+      - Namespace Functions: lavista/namespace_member_functions.md
+      - Files: lavista/files.md

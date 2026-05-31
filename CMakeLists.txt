@@ -32,3 +32,5 @@ add_subdirectory(src)
 if(LaVista_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+include(cmake/docs.cmake)

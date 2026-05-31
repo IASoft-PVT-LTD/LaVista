@@ -7,3 +7,10 @@ build/
 out/
 
 compile_commands.json
+
+docs/docs/api/
+docs/site/
+docs/site/assets/.doxy/
+
+xml/
+html/
