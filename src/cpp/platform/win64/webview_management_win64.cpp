@@ -57,6 +57,42 @@ namespace LaVista::_internal
     controller2->Release();
   }
 
+  auto apply_webview2_native_app_settings(webview_t w) -> void
+  {
+    if (w == nullptr)
+    {
+      return;
+    }
+    void *const raw = webview_get_native_handle(w, WEBVIEW_NATIVE_HANDLE_KIND_BROWSER_CONTROLLER);
+    if (raw == nullptr)
+    {
+      return;
+    }
+    auto *const controller = static_cast<ICoreWebView2Controller *>(raw);
+    ICoreWebView2 *core = nullptr;
+    if (FAILED(controller->get_CoreWebView2(&core)) || core == nullptr)
+    {
+      return;
+    }
+    ICoreWebView2Settings *settings = nullptr;
+    if (SUCCEEDED(core->get_Settings(&settings)) && settings != nullptr)
+    {
+      (void) settings->put_AreDefaultContextMenusEnabled(FALSE);
+
+      (void) settings->put_IsZoomControlEnabled(FALSE);
+
+      ICoreWebView2Settings3 *settings3 = nullptr;
+      if (SUCCEEDED(settings->QueryInterface(IID_ICoreWebView2Settings3, reinterpret_cast<void **>(&settings3))) &&
+          settings3 != nullptr)
+      {
+        (void) settings3->put_AreBrowserAcceleratorKeysEnabled(FALSE);
+        settings3->Release();
+      }
+      settings->Release();
+    }
+    core->Release();
+  }
+
   auto map_webview2_spa_virtual_host(webview_t w, const filesystem::Path &bundle_dir_abs) -> Result<void>
   {
     if (w == nullptr)
@@ -93,8 +129,7 @@ namespace LaVista::_internal
     core->Release();
     if (FAILED(hr))
     {
-      return fail("SetVirtualHostNameToFolderMapping failed (HRESULT 0x{:X})",
-                    static_cast<unsigned long>(hr));
+      return fail("SetVirtualHostNameToFolderMapping failed (HRESULT 0x{:X})", static_cast<unsigned long>(hr));
     }
     return {};
   }

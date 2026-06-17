@@ -838,14 +838,6 @@ namespace LaVista
       au::auxid::get_thread_logger().warn("LaVista: console forwarding unavailable: {}", console_result.unwrap_err());
     }
 
-    auto spa_result =
-        _internal::load_spa_bundle_into_webview(window, window_ptr(window)->webview, index_html, bundle_dir_abs);
-    if (spa_result.is_err())
-    {
-      (void) destroy_window(window);
-      return fail(std::move(spa_result.unwrap_err()));
-    }
-
     {
       auto chrome = install_window_chrome_bindings(window, window_ptr(window)->webview);
       if (chrome.is_err())
@@ -863,6 +855,14 @@ namespace LaVista
         (void) destroy_window(window);
         return fail(std::move(handshake_bind.unwrap_err()));
       }
+    }
+
+    auto spa_result =
+        _internal::load_spa_bundle_into_webview(window, window_ptr(window)->webview, index_html, bundle_dir_abs);
+    if (spa_result.is_err())
+    {
+      (void) destroy_window(window);
+      return fail(std::move(spa_result.unwrap_err()));
     }
 
     {

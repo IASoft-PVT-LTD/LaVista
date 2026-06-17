@@ -99,6 +99,7 @@ export namespace LaVista
     auto ensure_gtk_initialized() -> Result<void>;
 
     auto apply_webview2_default_background(webview_t w) -> void;
+    auto apply_webview2_native_app_settings(webview_t w) -> void;
     auto map_webview2_spa_virtual_host(webview_t w, const filesystem::Path &bundle_dir_abs) -> Result<void>;
 
     inline auto webview_error_to_result(webview_error_t err, const char *context) -> Result<void>

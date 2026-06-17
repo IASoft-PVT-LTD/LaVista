@@ -216,9 +216,6 @@ namespace LaVista::_internal
 
   auto platform_apply_post_webview_setup(Window_T &state, i32 width, i32 height) -> Result<void>
   {
-    /* Title bar webview is created only after create_window; during setup only the content webview exists.
-       Always pass the full window dimensions here — webview_set_size with a reduced height is interpreted as the
-       outer window size on Win32 and fights WM_SIZE when we stack a title bar via MoveWindow. */
     auto set_main_result =
         webview_error_to_result(webview_set_size(state.webview, width, height, WEBVIEW_HINT_NONE), "webview_set_size");
     if (set_main_result.is_err())
@@ -226,6 +223,7 @@ namespace LaVista::_internal
       return fail(std::move(set_main_result.unwrap_err()));
     }
     apply_webview2_default_background(state.webview);
+    apply_webview2_native_app_settings(state.webview);
     platform_layout_webviews(static_cast<Window>(&state));
     return {};
   }
@@ -286,6 +284,7 @@ namespace LaVista::_internal
     }
 
     state.platform.hwnd = hwnd;
+    SetEnvironmentVariableW(L"WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", L"--disk-cache-size=1");
 #if defined(NDEBUG)
     state.webview = webview_create(0, hwnd);
 #else
