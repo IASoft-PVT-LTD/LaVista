@@ -586,6 +586,45 @@ namespace LaVista
     return {};
   }
 
+  auto set_titlebar_theme(Window window, const String &background, const String &foreground, const String &border)
+      -> Result<void>
+  {
+    if (window == nullptr)
+    {
+      return fail("Window is null");
+    }
+
+    // No host title bar attached (e.g. it was cleared via set_window_titlebar): nothing to recolour.
+    if (window_ptr(window)->titlebar_webview == nullptr)
+    {
+      return {};
+    }
+
+    // Each colour is embedded as a JSON string literal (already quoted + escaped) and assigned via setProperty,
+    // so the value can only ever land as a CSS custom-property value — it cannot break out of the assignment.
+    // Empty colours stringify to "" which is falsy, so `set` skips them and leaves the current value intact.
+    const String bg = json_escape_for_string_literal(StringView(background.c_str(), background.size()));
+    const String fg = json_escape_for_string_literal(StringView(foreground.c_str(), foreground.size()));
+    const String bd = json_escape_for_string_literal(StringView(border.c_str(), border.size()));
+
+    String js;
+    js.reserve(bg.size() + fg.size() + bd.size() + 256);
+    js += "(function(){var r=document.querySelector('.lavista-tb-root');if(!r)return;"
+          "var s=function(k,v){if(v)r.style.setProperty(k,v);};"
+          "s('--tb-bg',";
+    js += bg;
+    js += ");s('--tb-fg',";
+    js += fg;
+    js += ");s('--tb-fg-title',";
+    js += fg;
+    js += ");s('--tb-border',";
+    js += bd;
+    js += ");})();";
+
+    return _internal::webview_error_to_result(webview_eval(window_ptr(window)->titlebar_webview, js.c_str()),
+                                              "webview_eval(titlebar theme)");
+  }
+
   static auto percent_decode(const String &in) -> String
   {
     auto hex = [](char ch) -> int {
@@ -866,7 +905,7 @@ namespace LaVista
     }
 
     {
-      auto html_res = _internal::build_default_titlebar_html(title, options.icon_path);
+      auto html_res = _internal::build_default_titlebar_html(title, options.icon_path, options.titlebar_theme);
       if (html_res.is_err())
       {
         (void) destroy_window(window);

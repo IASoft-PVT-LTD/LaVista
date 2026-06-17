@@ -219,6 +219,22 @@ export namespace LaVista
   auto set_window_titlebar(Window window, const String &html, i32 height_px = 40) -> Result<void>;
 
   /**
+   * @brief Recolours the active host title bar at runtime.
+   *
+   * Drives the title bar's CSS custom properties (`--tb-bg`, `--tb-fg`, `--tb-border`) so the bar can follow the
+   * SPA's active colour theme without rebuilding its HTML. Each colour is any valid CSS colour string (e.g.
+   * `#181818`, `rgb(...)`); an empty string leaves that property unchanged. No-op when no host title bar is active.
+   *
+   * @param window Window handle.
+   * @param background Title-bar background colour, or empty to keep the current value.
+   * @param foreground Title-bar text/icon colour, or empty to keep the current value.
+   * @param border Bottom-border colour, or empty to keep the current value.
+   * @return Success or an error.
+   */
+  auto set_titlebar_theme(Window window, const String &background, const String &foreground, const String &border)
+      -> Result<void>;
+
+  /**
    * @brief Binds a string-keyed callback invoked from the SPA via host events.
    *
    * @param window Window handle.

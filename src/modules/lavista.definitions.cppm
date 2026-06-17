@@ -41,6 +41,7 @@ export namespace LaVista
     String title{"LaVista App"};   ///< Initial window title and default title-bar label.
     String spa_bundle_path{""};    ///< Path to the SPA build directory (e.g. Astro/Vite `dist/`).
     String icon_path{""};          ///< Path to a PNG/JPEG icon (required on supported platforms).
+    String titlebar_theme{""};     ///< Default title-bar theme: "" (built-in default), "glass", "neon", "minimal", or "flat".
 
     i32 width{800};   ///< Initial client width in pixels.
     i32 height{600};  ///< Initial client height in pixels.

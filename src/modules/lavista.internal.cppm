@@ -144,7 +144,8 @@ export namespace LaVista
 
     auto load_inline_html_into_webview(Window window, webview_t w, String html_document) -> Result<void>;
 
-    auto build_default_titlebar_html(const String &window_title, const String &icon_path) -> Result<String>;
+    auto build_default_titlebar_html(const String &window_title, const String &icon_path, const String &theme = "")
+        -> Result<String>;
 
     auto platform_post_binary_data(Window window, const Span<const u8> &buffer) -> Result<String>;
   } // namespace _internal

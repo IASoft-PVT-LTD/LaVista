@@ -157,13 +157,19 @@ namespace LaVista::_internal
   {
     static constexpr const char *DEFAULT_TITLEBAR_THEME = "glass";
 
-    /* Three-column grid centers title between icon and controls with equal side tracks. */
     static constexpr char DEFAULT_TITLEBAR_HTML_TEMPLATE[] = R"LV(
 <style>
 :root{color-scheme:dark;}
 .lavista-tb-root{--tb-bg:linear-gradient(180deg,#1f293be8 0%,#111827f0 100%);--tb-border:#334155;--tb-fg:#e2e8f0;--tb-fg-title:#f1f5f9;--tb-btn-hover:#e2e8f01a;--tb-focus:#7dd3fc;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,max-content) minmax(0,1fr);align-items:center;box-sizing:border-box;height:100%;padding:0 4px 0 6px;background:var(--tb-bg);border-bottom:1px solid var(--tb-border);box-shadow:inset 0 1px 0 #ffffff12;color:var(--tb-fg);font:13px/1.1 "Segoe UI",system-ui,sans-serif;user-select:none;}
 .lavista-tb-theme-neon{--tb-bg:linear-gradient(180deg,#1b1039ed 0%,#140f2cf2 100%);--tb-border:#6366f1c2;--tb-fg:#e9ecff;--tb-fg-title:#f2f4ff;--tb-btn-hover:#c4b5fd24;--tb-focus:#a5b4fc;}
 .lavista-tb-theme-minimal{--tb-bg:linear-gradient(180deg,#0f172af2 0%,#111827fa 100%);--tb-border:#64748b;--tb-fg:#dbe2ea;--tb-fg-title:#f8fafc;--tb-btn-hover:#e2e8f014;--tb-focus:#93c5fd;}
+/* Flat: a single solid surface (no gradient, highlight, or text-shadow) that reads as one
+   continuous band with the SPA below it. Colours mirror VS Code's "Dark Modern" title bar
+   and are meant to be overridden at runtime via set_titlebar_theme so the bar follows the
+   app's active theme. */
+.lavista-tb-theme-flat{--tb-bg:#181818;--tb-border:#2b2b2b;--tb-fg:#cccccc;--tb-fg-title:#cccccc;--tb-btn-hover:#ffffff14;--tb-focus:#0078d4;box-shadow:none;}
+.lavista-tb-theme-flat .lavista-tb-title{text-shadow:none;}
+.lavista-tb-theme-flat .lavista-tb-close:hover{background:#c42b1c;color:#fff;}
 .lavista-tb-left{display:flex;align-items:center;gap:8px;min-width:0;justify-self:start;padding-left:2px;}
 .lavista-tb-title{font-weight:600;letter-spacing:.01em;justify-self:center;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:min(100vw - 172px,560px);padding:0 8px;color:var(--tb-fg-title);text-shadow:0 1px 1px #00000042;}
 .lavista-tb-nav{display:flex;height:100%;align-items:stretch;justify-self:end;gap:2px;padding-right:2px;}
@@ -367,7 +373,8 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
     }
   } // namespace
 
-  auto build_default_titlebar_html(const String &window_title, const String &icon_path) -> Result<String>
+  auto build_default_titlebar_html(const String &window_title, const String &icon_path, const String &theme)
+      -> Result<String>
   {
     const filesystem::Path fs_path{icon_path.c_str()};
     auto bytes_res = read_entire_file_binary(fs_path);
@@ -387,15 +394,22 @@ window.addEventListener("resize",lavistaSyncMaxIcon);
                "style=\"display:block;border-radius:6px;object-fit:contain;flex-shrink:0;box-shadow:0 1px 0 "
                "rgba(255,255,255,.24),0 3px 10px rgba(2,6,23,.35);\" />";
 
+    // An explicit theme arg wins; otherwise fall back to the compile-time default.
+    const char *const selected_theme = theme.empty() ? DEFAULT_TITLEBAR_THEME : theme.c_str();
+
     String html(DEFAULT_TITLEBAR_HTML_TEMPLATE);
     String theme_class = "lavista-tb-theme-glass";
-    if (std::strcmp(DEFAULT_TITLEBAR_THEME, "neon") == 0)
+    if (std::strcmp(selected_theme, "neon") == 0)
     {
       theme_class = "lavista-tb-theme-neon";
     }
-    else if (std::strcmp(DEFAULT_TITLEBAR_THEME, "minimal") == 0)
+    else if (std::strcmp(selected_theme, "minimal") == 0)
     {
       theme_class = "lavista-tb-theme-minimal";
+    }
+    else if (std::strcmp(selected_theme, "flat") == 0)
+    {
+      theme_class = "lavista-tb-theme-flat";
     }
     replace_all(html, "<theme_class_placeholder>", StringView(theme_class.c_str()));
     replace_all(html, "<window_icon_placeholder>", StringView(img_tag.c_str()));
