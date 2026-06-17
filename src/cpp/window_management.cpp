@@ -586,12 +586,92 @@ namespace LaVista
     return {};
   }
 
+  namespace
+  {
+    // Parses a CSS colour string as pushed by the workbench theme — "#rgb", "#rrggbb",
+    // "#rrggbbaa", or "rgb()/rgba()" — into 0xRRGGBB. Returns false if it cannot be parsed.
+    auto parse_css_color_rgb(const String &in, u32 &out_rgb) -> bool
+    {
+      auto hex_digit = [](char c, int &v) -> bool {
+        if (c >= '0' && c <= '9') { v = c - '0'; return true; }
+        if (c >= 'a' && c <= 'f') { v = c - 'a' + 10; return true; }
+        if (c >= 'A' && c <= 'F') { v = c - 'A' + 10; return true; }
+        return false;
+      };
+
+      const char *const p = in.c_str();
+      const usize n = in.size();
+      usize i = 0;
+      while (i < n && (p[i] == ' ' || p[i] == '\t')) { ++i; }
+      if (i >= n) { return false; }
+
+      if (p[i] == '#')
+      {
+        ++i;
+        int d[8] = {0};
+        usize count = 0;
+        while (i < n && count < 8 && hex_digit(p[i], d[count])) { ++i; ++count; }
+        if (count >= 6)
+        {
+          const u32 r = static_cast<u32>(d[0] * 16 + d[1]);
+          const u32 g = static_cast<u32>(d[2] * 16 + d[3]);
+          const u32 b = static_cast<u32>(d[4] * 16 + d[5]);
+          out_rgb = (r << 16) | (g << 8) | b;
+          return true;
+        }
+        if (count >= 3) // shorthand #rgb -> #rrggbb
+        {
+          const u32 r = static_cast<u32>(d[0] * 16 + d[0]);
+          const u32 g = static_cast<u32>(d[1] * 16 + d[1]);
+          const u32 b = static_cast<u32>(d[2] * 16 + d[2]);
+          out_rgb = (r << 16) | (g << 8) | b;
+          return true;
+        }
+        return false;
+      }
+
+      // rgb(...) / rgba(...): read the first three integer components.
+      while (i < n && p[i] != '(') { ++i; }
+      if (i >= n) { return false; }
+      ++i;
+      u32 comps[3] = {0, 0, 0};
+      for (int c = 0; c < 3; ++c)
+      {
+        while (i < n && (p[i] == ' ' || p[i] == ',')) { ++i; }
+        bool any = false;
+        int val = 0;
+        while (i < n && p[i] >= '0' && p[i] <= '9') { val = val * 10 + (p[i] - '0'); any = true; ++i; }
+        if (!any) { return false; }
+        comps[c] = static_cast<u32>(val > 255 ? 255 : val);
+      }
+      out_rgb = (comps[0] << 16) | (comps[1] << 8) | comps[2];
+      return true;
+    }
+
+    // Rec. 601 luma; the frame is "dark" when the colour sits closer to black than white.
+    auto color_is_dark(u32 rgb) -> bool
+    {
+      const u32 r = (rgb >> 16) & 0xFFu;
+      const u32 g = (rgb >> 8) & 0xFFu;
+      const u32 b = rgb & 0xFFu;
+      return (r * 299u + g * 587u + b * 114u) / 1000u < 128u;
+    }
+  } // namespace
+
   auto set_titlebar_theme(Window window, const String &background, const String &foreground, const String &border)
       -> Result<void>
   {
     if (window == nullptr)
     {
       return fail("Window is null");
+    }
+
+    // Tint the native window frame/border to match the theme's title-bar background, so the OS
+    // border follows the workbench instead of staying its default (white) colour.
+    u32 frame_rgb = 0;
+    if (parse_css_color_rgb(background, frame_rgb))
+    {
+      _internal::platform_apply_window_frame_theme(window, color_is_dark(frame_rgb), frame_rgb);
     }
 
     // No host title bar attached (e.g. it was cleared via set_window_titlebar): nothing to recolour.

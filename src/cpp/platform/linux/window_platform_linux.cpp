@@ -386,6 +386,11 @@ namespace LaVista::_internal
     }
   }
 
+  // No themable native frame on this backend (the window is borderless / CSD-driven).
+  auto platform_apply_window_frame_theme(Window, bool, u32) -> void
+  {
+  }
+
   auto platform_create_titlebar_webview(Window window) -> Result<void>
   {
     if (window_ptr(window)->titlebar_webview != nullptr)

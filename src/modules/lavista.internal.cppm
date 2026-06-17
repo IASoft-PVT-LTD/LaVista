@@ -135,6 +135,11 @@ export namespace LaVista
     auto platform_window_is_maximized(Window window) -> bool;
     auto platform_close_window(Window window) -> void;
 
+    // Tints the native window frame/border so it follows the workbench theme: `dark` switches the
+    // OS frame between its light/dark variants (Win10 2004+), `border_rgb` sets the exact border
+    // colour where supported (Win11). No-op on platforms without a themable native frame.
+    auto platform_apply_window_frame_theme(Window window, bool dark, u32 border_rgb) -> void;
+
     auto platform_create_titlebar_webview(Window window) -> Result<void>;
     auto platform_destroy_titlebar_webview(Window window) -> Result<void>;
     auto platform_layout_webviews(Window window) -> void;

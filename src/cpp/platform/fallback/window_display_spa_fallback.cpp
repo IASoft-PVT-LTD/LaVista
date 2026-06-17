@@ -92,6 +92,10 @@ namespace LaVista::_internal
   {
   }
 
+  auto platform_apply_window_frame_theme(Window, bool, u32) -> void
+  {
+  }
+
   auto platform_create_titlebar_webview(Window) -> Result<void>
   {
     return fail("Host-managed title bar is not supported for this platform configuration");

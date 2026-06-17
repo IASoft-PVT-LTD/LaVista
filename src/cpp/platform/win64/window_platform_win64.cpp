@@ -12,6 +12,9 @@ module;
 #include <windows.h>
 #include <windowsx.h>
 
+#include <uxtheme.h> // MARGINS (used by DwmExtendFrameIntoClientArea below)
+#include <dwmapi.h>
+
 #include <cstring>
 
 #include <objbase.h>
@@ -147,19 +150,6 @@ namespace LaVista::_internal
         Window state = reinterpret_cast<Window>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
         switch (msg)
         {
-        case WM_NCHITTEST: {
-          POINT pt{GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)};
-          RECT wr{};
-          if (!GetWindowRect(hwnd, &wr))
-          {
-            return DefWindowProcW(hwnd, msg, w_param, l_param);
-          }
-          if (!PtInRect(&wr, pt))
-          {
-            return HTNOWHERE;
-          }
-          return HTCLIENT;
-        }
         case WM_ERASEBKGND:
           return 1;
         case WM_SIZE: {
@@ -193,11 +183,40 @@ namespace LaVista::_internal
           return 0;
         }
         case WM_NCCALCSIZE: {
-          if (w_param == TRUE)
+          if (w_param != TRUE)
           {
-            return 0;
+            return DefWindowProcW(hwnd, msg, w_param, l_param);
           }
-          return DefWindowProcW(hwnd, msg, w_param, l_param);
+
+          /* Borderless-but-resizable window: keep the OS sizing frame (so the left/right/bottom
+           * edges and corners resize natively, and Windows paints its thin window border), but
+           * reclaim the top frame so our custom title-bar webview reaches the very top edge
+           * instead of leaving a native caption strip there. This is the standard pattern used by
+           * Chromium/Windows Terminal for custom title bars. */
+          auto *const params = reinterpret_cast<NCCALCSIZE_PARAMS *>(l_param);
+          const LONG requested_top = params->rgrc[0].top;
+
+          // Let Windows compute the default client rect (removes caption + all sizing borders).
+          const LRESULT ret = DefWindowProcW(hwnd, msg, w_param, l_param);
+          if (ret != 0)
+          {
+            return ret;
+          }
+
+          if (IsZoomed(hwnd) != FALSE)
+          {
+            // Maximized: a thick-frame window is sized to the work area expanded by the frame on
+            // every side, so the default client already sits within the work area (taskbar stays
+            // visible). Just drop the caption inset by re-adding the frame height to the top.
+            params->rgrc[0].top =
+                requested_top + GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+          }
+          else
+          {
+            // Restored: reclaim the full top frame so the title bar meets the top edge.
+            params->rgrc[0].top = requested_top;
+          }
+          return 0;
         }
         default:
           return DefWindowProcW(hwnd, msg, w_param, l_param);
@@ -239,13 +258,27 @@ namespace LaVista::_internal
       return fail(std::move(register_result.unwrap_err()));
     }
 
+    // WS_OVERLAPPEDWINDOW (caption + thick frame + min/max boxes + sysmenu) makes Axiom a normal
+    // resizable Windows app: it gets Aero Snap, taskbar integration, and — crucially — maximizes
+    // to the monitor *work area* (taskbar stays visible) rather than covering the whole screen the
+    // way a WS_POPUP window does. The native caption is removed in WM_NCCALCSIZE so our custom
+    // title bar shows instead, while the sizing frame is kept for edge/corner resizing.
     HWND hwnd = CreateWindowExW(
-        0, L"LaVistaWindowClass", L"", WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, window_x, window_y,
-        static_cast<int>(width), static_cast<int>(height), nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+        0, L"LaVistaWindowClass", L"", WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, window_x,
+        window_y, static_cast<int>(width), static_cast<int>(height), nullptr, nullptr, GetModuleHandleW(nullptr),
+        nullptr);
     if (hwnd == nullptr)
     {
       return fail("CreateWindowExW() failed");
     }
+
+    // Extending the frame a single pixel into the client lets DWM render the window's drop shadow
+    // and its thin border around our frameless content, then SWP_FRAMECHANGED forces our new
+    // WM_NCCALCSIZE to take effect for the initial frame.
+    const MARGINS shadow_margins{0, 0, 1, 0};
+    (void) DwmExtendFrameIntoClientArea(hwnd, &shadow_margins);
+    SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 
     {
       Vec<u8> rgba_full;
@@ -546,6 +579,50 @@ namespace LaVista::_internal
     if (window_ptr(window)->platform.hwnd != nullptr && IsWindow(window_ptr(window)->platform.hwnd))
     {
       PostMessageW(window_ptr(window)->platform.hwnd, WM_CLOSE, 0, 0);
+    }
+  }
+
+  auto platform_apply_window_frame_theme(Window window, bool dark, u32 border_rgb) -> void
+  {
+    HWND const hwnd = window_ptr(window)->platform.hwnd;
+    if (hwnd == nullptr || !IsWindow(hwnd))
+    {
+      return;
+    }
+
+    // DWMWA_USE_IMMERSIVE_DARK_MODE (20): swaps the OS-drawn frame border between its light and
+    // dark variants. Supported on Windows 10 2004+ and Windows 11; harmlessly ignored on older
+    // builds. This is what turns the otherwise-white border dark to match a dark workbench theme.
+    BOOL const dark_flag = dark ? TRUE : FALSE;
+    (void) DwmSetWindowAttribute(hwnd, 20 /*DWMWA_USE_IMMERSIVE_DARK_MODE*/, &dark_flag, sizeof(dark_flag));
+
+    // DWMWA_BORDER_COLOR (34): exact border colour, Windows 11 22000+ only. Ignored elsewhere, so
+    // Windows 10 falls back to the light/dark frame chosen above.
+    COLORREF const border = RGB((border_rgb >> 16) & 0xFFu, (border_rgb >> 8) & 0xFFu, border_rgb & 0xFFu);
+    (void) DwmSetWindowAttribute(hwnd, 34 /*DWMWA_BORDER_COLOR*/, &border, sizeof(border));
+
+    // Windows 10 does not repaint the immersive frame border when the dark/light mode is changed on
+    // an already-visible window — SWP_FRAMECHANGED alone is not enough, only a genuine size change
+    // is. When the dark state actually changes (notably the first push after launch, which flips the
+    // default white border to the themed one), force a repaint by growing the window 1px and
+    // reverting it. Skipped while maximized (no visible border) and when the state is unchanged, so
+    // ordinary theme re-pushes don't flicker.
+    const int new_dark = dark ? 1 : 0;
+    const bool dark_changed = window_ptr(window)->platform.frame_dark != new_dark;
+    window_ptr(window)->platform.frame_dark = new_dark;
+
+    constexpr UINT nudge_flags = SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
+    RECT wr{};
+    if (dark_changed && IsZoomed(hwnd) == FALSE && GetWindowRect(hwnd, &wr))
+    {
+      const int w = wr.right - wr.left;
+      const int h = wr.bottom - wr.top;
+      SetWindowPos(hwnd, nullptr, 0, 0, w, h + 1, nudge_flags);
+      SetWindowPos(hwnd, nullptr, 0, 0, w, h, nudge_flags);
+    }
+    else
+    {
+      SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, nudge_flags | SWP_NOSIZE);
     }
   }
 } // namespace LaVista::_internal

@@ -18,5 +18,9 @@ namespace LaVista
     HWND hwnd = nullptr;
     HICON icon_small = nullptr;
     HICON icon_big = nullptr;
+    // Last immersive-frame state pushed to the OS: -1 = none yet, 0 = light, 1 = dark. Used to
+    // force a one-time frame repaint when the value changes (Windows 10 won't otherwise refresh
+    // the border until the window is resized).
+    int frame_dark = -1;
   };
 } // namespace LaVista

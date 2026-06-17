@@ -24,6 +24,8 @@ if(WIN32)
         cpp/platform/win64/spa_bundle_loader_win64.cpp
         cpp/platform/win64/window_platform_win64.cpp
     )
+    # DwmExtendFrameIntoClientArea (window shadow/border for the custom-title-bar window).
+    target_link_libraries(LaVista PRIVATE dwmapi)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_include_directories(LaVista PRIVATE hpp/platform/linux)
     target_sources(LaVista PRIVATE
