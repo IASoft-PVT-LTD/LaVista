@@ -266,7 +266,8 @@ namespace LaVista
   static auto update_drag_strip_eval(Window window, const WindowDragStripOptions &opts) -> Result<void>
   {
     const String js = format_drag_strip_eval_assign(opts);
-    return _internal::webview_error_to_result(webview_eval(window_ptr(window)->webview, js.c_str()), "webview_eval(drag-strip)");
+    return _internal::webview_error_to_result(webview_eval(window_ptr(window)->webview, js.c_str()),
+                                              "webview_eval(drag-strip)");
   }
 
   /**
@@ -285,16 +286,18 @@ namespace LaVista
       if (window_ptr(window)->titlebar_drag_strip_js_installed)
       {
         return _internal::webview_error_to_result(
-            webview_eval(window_ptr(window)->titlebar_webview, "if(window.__lavistaDragStrip){"
-                                                   "window.__lavistaDragStrip.sx=0;window.__lavistaDragStrip.sy=0;"
-                                                   "window.__lavistaDragStrip.ex=0;window.__lavistaDragStrip.ey=0;}"),
+            webview_eval(window_ptr(window)->titlebar_webview,
+                         "if(window.__lavistaDragStrip){"
+                         "window.__lavistaDragStrip.sx=0;window.__lavistaDragStrip.sy=0;"
+                         "window.__lavistaDragStrip.ex=0;window.__lavistaDragStrip.ey=0;}"),
             "webview_eval(titlebar drag-strip-disable)");
       }
       return {};
     }
 
     return configure_movable_drag_strip(window, window_ptr(window)->titlebar_webview, opts,
-                                        &window_ptr(window)->titlebar_drag_strip_js_installed, window_ptr(window)->titlebar_drag_bind_ctx);
+                                        &window_ptr(window)->titlebar_drag_strip_js_installed,
+                                        window_ptr(window)->titlebar_drag_bind_ctx);
   }
 
   static auto apply_window_drag_strip(Window window, const WindowDragStripOptions &opts) -> Result<void>
@@ -311,9 +314,10 @@ namespace LaVista
       if (window_ptr(window)->content_drag_strip_js_installed)
       {
         return _internal::webview_error_to_result(
-            webview_eval(window_ptr(window)->webview, "if(window.__lavistaDragStrip){"
-                                          "window.__lavistaDragStrip.sx=0;window.__lavistaDragStrip.sy=0;"
-                                          "window.__lavistaDragStrip.ex=0;window.__lavistaDragStrip.ey=0;}"),
+            webview_eval(window_ptr(window)->webview,
+                         "if(window.__lavistaDragStrip){"
+                         "window.__lavistaDragStrip.sx=0;window.__lavistaDragStrip.sy=0;"
+                         "window.__lavistaDragStrip.ex=0;window.__lavistaDragStrip.ey=0;}"),
             "webview_eval(drag-strip-disable)");
       }
       return {};
@@ -321,7 +325,8 @@ namespace LaVista
 
     if (!window_ptr(window)->content_drag_strip_js_installed)
     {
-      return configure_movable_drag_strip(window, window_ptr(window)->webview, opts, &window_ptr(window)->content_drag_strip_js_installed,
+      return configure_movable_drag_strip(window, window_ptr(window)->webview, opts,
+                                          &window_ptr(window)->content_drag_strip_js_installed,
                                           window_ptr(window)->content_drag_bind_ctx);
     }
 
@@ -581,6 +586,148 @@ namespace LaVista
     return {};
   }
 
+  static auto percent_decode(const String &in) -> String
+  {
+    auto hex = [](char ch) -> int {
+      if (ch >= '0' && ch <= '9')
+      {
+        return ch - '0';
+      }
+      if (ch >= 'a' && ch <= 'f')
+      {
+        return ch - 'a' + 10;
+      }
+      if (ch >= 'A' && ch <= 'F')
+      {
+        return ch - 'A' + 10;
+      }
+      return -1;
+    };
+    String out;
+    const char *p = in.c_str();
+    const usize n = in.size();
+    for (usize i = 0; i < n; ++i)
+    {
+      if (p[i] == '%' && i + 2 < n)
+      {
+        const int hi = hex(p[i + 1]);
+        const int lo = hex(p[i + 2]);
+        if (hi >= 0 && lo >= 0)
+        {
+          out.push_back(static_cast<char>((hi << 4) | lo));
+          i += 2;
+          continue;
+        }
+      }
+      out.push_back(p[i]);
+    }
+    return out;
+  }
+
+  static const char *const LAVISTA_CONSOLE_FORWARD_JS = R"JS((function(){
+  if (window.__lavistaConsoleForwarded) { return; }
+  window.__lavistaConsoleForwarded = true;
+  var fmt = function(a){
+    if (typeof a === 'string') { return a; }
+    if (a instanceof Error) { return (a.stack || a.message || String(a)); }
+    try { return JSON.stringify(a); } catch (e) { return String(a); }
+  };
+  var send = function(level, args){
+    try {
+      var parts = [];
+      for (var i = 0; i < args.length; i++) { parts.push(fmt(args[i])); }
+      var line = level + '\t' + parts.join(' ');
+      if (window.__lavista_console_sink) { window.__lavista_console_sink(encodeURIComponent(line)); }
+    } catch (e) {}
+  };
+  ['log','info','warn','error','debug'].forEach(function(level){
+    var orig = (typeof console[level] === 'function') ? console[level].bind(console) : function(){};
+    console[level] = function(){ send(level, arguments); return orig.apply(console, arguments); };
+  });
+  window.addEventListener('error', function(e){
+    try { send('error', [ (e && e.error && e.error.stack) || (e && e.message) || 'window error' ]); } catch (_) {}
+  }, true);
+  window.addEventListener('unhandledrejection', function(e){
+    try { send('error', [ 'unhandledrejection: ' + ((e && e.reason && (e.reason.stack || e.reason.message)) || String(e && e.reason)) ]); } catch (_) {}
+  });
+})();)JS";
+
+  static auto install_console_forwarding(webview_t target) -> Result<void>
+  {
+    if (target == nullptr)
+    {
+      return fail("Console forwarding target webview is null");
+    }
+
+    AU_TRY_DISCARD(_internal::webview_error_to_result(webview_bind(
+                                                          target, "__lavista_console_sink",
+                                                          +[](const char *id, const char *req, void *arg) {
+                                                            auto sender = static_cast<webview_t>(arg);
+
+                                                            String encoded;
+                                                            if (req != nullptr)
+                                                            {
+                                                              const char *p = req;
+                                                              while (*p != '\0' && *p != '"')
+                                                              {
+                                                                ++p;
+                                                              }
+                                                              if (*p == '"')
+                                                              {
+                                                                ++p;
+                                                                const char *start = p;
+                                                                while (*p != '\0' && *p != '"')
+                                                                {
+                                                                  ++p;
+                                                                }
+                                                                encoded.assign(
+                                                                    StringView(start, static_cast<usize>(p - start)));
+                                                              }
+                                                            }
+
+                                                            const String line = percent_decode(encoded);
+
+                                                            const char *c = line.c_str();
+                                                            char level = 'i';
+                                                            const char *msg = c;
+                                                            for (const char *q = c; *q != '\0'; ++q)
+                                                            {
+                                                              if (*q == '\t')
+                                                              {
+                                                                level = (q == c) ? 'i' : *c;
+                                                                msg = q + 1;
+                                                                break;
+                                                              }
+                                                            }
+
+                                                            auto &logger = au::auxid::get_thread_logger();
+                                                            if (level == 'e')
+                                                            {
+                                                              logger.error("[webview] {}", msg);
+                                                            }
+                                                            else if (level == 'w')
+                                                            {
+                                                              logger.warn("[webview] {}", msg);
+                                                            }
+                                                            else
+                                                            {
+                                                              logger.info("[webview] {}", msg);
+                                                            }
+
+                                                            if (sender != nullptr && id != nullptr)
+                                                            {
+                                                              webview_return(sender, id, 0, "null");
+                                                            }
+                                                          },
+                                                          target),
+                                                      "webview_bind(__lavista_console_sink)"));
+
+    AU_TRY_DISCARD(_internal::webview_error_to_result(webview_init(target, LAVISTA_CONSOLE_FORWARD_JS),
+                                                      "webview_init(console-forward)"));
+    (void) webview_eval(target, LAVISTA_CONSOLE_FORWARD_JS);
+    return {};
+  }
+
   auto create_window(const WindowCreateOptions &options) -> Result<Window>
   {
     const i32 width = options.width;
@@ -686,7 +833,13 @@ namespace LaVista
 
     AU_TRY_VAR(bundle_dir_abs, filesystem::absolute(bundle_dir));
 
-    auto spa_result = _internal::load_spa_bundle_into_webview(window, window_ptr(window)->webview, index_html, bundle_dir_abs);
+    if (auto console_result = install_console_forwarding(window_ptr(window)->webview); console_result.is_err())
+    {
+      au::auxid::get_thread_logger().warn("LaVista: console forwarding unavailable: {}", console_result.unwrap_err());
+    }
+
+    auto spa_result =
+        _internal::load_spa_bundle_into_webview(window, window_ptr(window)->webview, index_html, bundle_dir_abs);
     if (spa_result.is_err())
     {
       (void) destroy_window(window);
@@ -785,7 +938,8 @@ namespace LaVista
       }
     }
 
-    auto destroy_result = _internal::webview_error_to_result(webview_destroy(window_ptr(window)->webview), "webview_destroy");
+    auto destroy_result =
+        _internal::webview_error_to_result(webview_destroy(window_ptr(window)->webview), "webview_destroy");
     window_ptr(window)->webview = nullptr;
     window_ptr(window)->running = false;
 
@@ -855,8 +1009,8 @@ namespace LaVista
     {
       return fail("Window is null");
     }
-    auto set_title_result =
-        _internal::webview_error_to_result(webview_set_title(window_ptr(window)->webview, title.c_str()), "webview_set_title");
+    auto set_title_result = _internal::webview_error_to_result(
+        webview_set_title(window_ptr(window)->webview, title.c_str()), "webview_set_title");
     if (set_title_result.is_err())
     {
       return fail(std::move(set_title_result.unwrap_err()));
@@ -954,8 +1108,8 @@ namespace LaVista
       return fail("Event name cannot be empty");
     }
 
-    auto unbind_result =
-        _internal::webview_error_to_result(webview_unbind(window_ptr(window)->webview, event.c_str()), "webview_unbind");
+    auto unbind_result = _internal::webview_error_to_result(webview_unbind(window_ptr(window)->webview, event.c_str()),
+                                                            "webview_unbind");
     if (unbind_result.is_err())
     {
       return fail(std::move(unbind_result.unwrap_err()));

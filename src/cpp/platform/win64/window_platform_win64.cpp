@@ -286,7 +286,11 @@ namespace LaVista::_internal
     }
 
     state.platform.hwnd = hwnd;
+#if defined(NDEBUG)
     state.webview = webview_create(0, hwnd);
+#else
+    state.webview = webview_create(1, hwnd);
+#endif
     if (state.webview == nullptr)
     {
       if (state.platform.icon_big != nullptr)
@@ -403,8 +407,8 @@ namespace LaVista::_internal
       return fail("Native window handle is not valid");
     }
     /* Resize the frame once at full dimensions; children are positioned in platform_layout_webviews only. */
-    if (SetWindowPos(window_ptr(window)->platform.hwnd, nullptr, 0, 0, static_cast<int>(width), static_cast<int>(height),
-                     SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE) == FALSE)
+    if (SetWindowPos(window_ptr(window)->platform.hwnd, nullptr, 0, 0, static_cast<int>(width),
+                     static_cast<int>(height), SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE) == FALSE)
     {
       return fail("SetWindowPos() failed");
     }
@@ -437,7 +441,8 @@ namespace LaVista::_internal
     {
       return {};
     }
-    auto r = webview_error_to_result(webview_destroy(window_ptr(window)->titlebar_webview), "webview_destroy(titlebar)");
+    auto r =
+        webview_error_to_result(webview_destroy(window_ptr(window)->titlebar_webview), "webview_destroy(titlebar)");
     window_ptr(window)->titlebar_webview = nullptr;
     return r;
   }
@@ -468,8 +473,8 @@ namespace LaVista::_internal
 
     if (window_ptr(window)->titlebar_webview != nullptr && tb_h > 0)
     {
-      HWND tb_widget =
-          static_cast<HWND>(webview_get_native_handle(window_ptr(window)->titlebar_webview, WEBVIEW_NATIVE_HANDLE_KIND_UI_WIDGET));
+      HWND tb_widget = static_cast<HWND>(
+          webview_get_native_handle(window_ptr(window)->titlebar_webview, WEBVIEW_NATIVE_HANDLE_KIND_UI_WIDGET));
       if (tb_widget != nullptr)
       {
         MoveWindow(tb_widget, 0, 0, total_w, tb_h, TRUE);
@@ -501,7 +506,8 @@ namespace LaVista::_internal
      * WM_NCLBUTTONDOWN's lParam exactly) so the move loop anchors where the user actually clicked. Post rather
      * than Send to avoid re-entering the WebView2 script thread. */
     ReleaseCapture();
-    (void) PostMessageW(window_ptr(window)->platform.hwnd, WM_NCLBUTTONDOWN, HTCAPTION, static_cast<LPARAM>(GetMessagePos()));
+    (void) PostMessageW(window_ptr(window)->platform.hwnd, WM_NCLBUTTONDOWN, HTCAPTION,
+                        static_cast<LPARAM>(GetMessagePos()));
   }
 
   auto platform_minimize_window(Window window) -> void
@@ -554,7 +560,8 @@ namespace LaVista::_internal
       return fail("Window or webview is null");
     }
 
-    void *const raw = webview_get_native_handle(window_ptr(window)->webview, WEBVIEW_NATIVE_HANDLE_KIND_BROWSER_CONTROLLER);
+    void *const raw =
+        webview_get_native_handle(window_ptr(window)->webview, WEBVIEW_NATIVE_HANDLE_KIND_BROWSER_CONTROLLER);
     if (raw == nullptr)
     {
       return fail("WebView2 controller handle unavailable");
