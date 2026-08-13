@@ -12,7 +12,7 @@
 </div>
 
 > [!WARNING]
-> This repository is now archived. IASoft no longer publishes latest changes to this library publicly.
+> This repository is now archived. IASoft no longer publishes updates to this library publicly.
 >
 > If you're a current license holder, you should have received an email from IASoft detailing the changes and steps to access the latest source code via IASoft Partner Dashboard alongside a rationale for this decision.
 > (NOTE: IASoft Partner Dashboard was previously called IASoft Client Dashboard).
